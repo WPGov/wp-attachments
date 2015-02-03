@@ -1,0 +1,39 @@
+#ij-post-attachments img.loader {
+	padding-left: 3px;
+	vertical-align: middle;
+}
+#ij-post-attachments  {
+	background: transparent;
+}
+#ij-post-attachments alignleft {
+	float: none;
+}
+
+
+.ij-post-attachment {
+	float: left;
+	width: 100%;
+	height: 74px;
+	margin: 0 10px 10px 0;
+	border: 1px solid #CCC;
+	border-radius: 2px;
+	background: white;
+	cursor: default;
+}
+
+.ij-post-attachment:hover {
+	border: solid 1px #CCC;
+	box-shadow: 0px 0px 2px #999;
+}
+
+.ij-post-attachment-title {
+	padding: 5px;
+	border-radius: 5px 5px 0 0;
+	cursor: default;
+}
+
+.ij-post-attachment img {
+	float: left;
+	margin-right: 5px;
+	cursor: move;
+}

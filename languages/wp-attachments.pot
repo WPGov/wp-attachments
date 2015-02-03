@@ -1,0 +1,130 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Attachments\n"
+"POT-Creation-Date: 2014-07-16 11:43-0300\n"
+"PO-Revision-Date: 2014-07-16 11:43-0300\n"
+"Last-Translator: \n"
+"Language-Team: Marco Milesi\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../attach_unattach_reattach.php:5
+msgid "Parent"
+msgstr ""
+
+#: ../attach_unattach_reattach.php:13 ../settings.php:84
+msgid "Include images"
+msgstr ""
+
+#: ../attach_unattach_reattach.php:29
+msgid "Re-Attach"
+msgstr ""
+
+#: ../attach_unattach_reattach.php:31 ../html/metabox.php:26
+msgid "Unattach"
+msgstr ""
+
+#: ../attach_unattach_reattach.php:36
+msgid "Parent term does not exist."
+msgstr ""
+
+#: ../attach_unattach_reattach.php:39
+msgid "Attach"
+msgstr ""
+
+#: ../ij-post-attachments.php:87
+msgid "Media"
+msgstr ""
+
+#: ../ij-post-attachments.php:111
+msgid "Edit Media"
+msgstr ""
+
+#: ../settings.php:9
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: ../settings.php:59
+msgid "Options"
+msgstr ""
+
+#: ../settings.php:76
+msgid "List Title"
+msgstr ""
+
+#: ../settings.php:82
+msgid "Insert here the title you want for the attachments list"
+msgstr ""
+
+#: ../settings.php:90
+msgid ""
+"Check this option if you want to include images (.jpg, .jpeg, .gif, .png) in "
+"the attachments list"
+msgstr ""
+
+#: ../settings.php:93
+msgid "Show date"
+msgstr ""
+
+#: ../settings.php:99
+msgid "Check this if you want to show the date of file upload"
+msgstr ""
+
+#: ../settings.php:102
+msgid "Open in new tab"
+msgstr ""
+
+#: ../settings.php:108
+msgid ""
+"Check this option if you want to add target=\"_blank\" to every file listed "
+"in order to open it in a new tab"
+msgstr ""
+
+#: ../settings.php:116
+msgid "Help, Support & Feedback"
+msgstr ""
+
+#: ../settings.php:117
+msgid ""
+"This plugin is mantained by <a href=\\\"http://marcomilesi.ml\\\" title=\\"
+"\"Marco Milesi\\\">Marco Milesi</a> and is based on simplicity and "
+"intuitiveness. Keep it updated :)<br/>Thank You for using WP Attachments!"
+msgstr ""
+
+#: ../wp-attachments.php:152
+msgid "Attachments"
+msgstr ""
+
+#: ../html/attachmentEditIframe.php:2 ../html/attachmentEditIframe.php:14
+msgid "Update Media"
+msgstr ""
+
+#: ../html/metabox.php:23
+msgid "Insert into post"
+msgstr ""
+
+#: ../html/metabox.php:24
+msgid "Edit"
+msgstr ""
+
+#: ../html/metabox.php:26 ../html/metabox.php:27
+msgid "Are you sure you want to do this?"
+msgstr ""
+
+#: ../html/metabox.php:27
+msgid "Remove"
+msgstr ""
+
+#: ../html/metabox.php:57
+msgid "No media attachments found."
+msgstr ""
+
+#: ../html/metabox.php:61
+msgid "Add Media"
+msgstr ""
