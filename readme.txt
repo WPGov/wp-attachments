@@ -99,6 +99,7 @@ add_filter( 'wpatt_accepted_formats', 'my_custom_function' );`
 
 = 5.0.4 20211020 =
 * Compatibility check
+* Linked development workflows on Github - https://github.com/WPGov/wp-attachments
 * Minor changes
 
 = 5.0 20201128 =
