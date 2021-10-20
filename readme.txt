@@ -4,8 +4,8 @@ Tags: attach, attachments, automatic, editor, page, post, woocommerce, better, m
 Donate link: https://www.paypal.me/milesimarco
 Requires at least: 4.4
 Tested up to: 5.6
-Version: 5.0.3
-Stable tag: 5.0.3
+Version: 5.0.4
+Stable tag: 5.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -97,7 +97,7 @@ add_filter( 'wpatt_accepted_formats', 'my_custom_function' );`
 
 == Changelog ==
 
-= 5.0.3 20211020 =
+= 5.0.4 20211020 =
 * Compatibility check
 * Minor changes
 
