@@ -5,7 +5,7 @@ Plugin URI:   https://wordpress.org/plugins/wp-attachments
 Description: Powerful solution to manage and show your WordPress media in posts and pages
 Author: Marco Milesi
 Author URI:   https://www.marcomilesi.com
-Version: 5.0.3
+Version: 5.0.5
 Text Domain: wp-attachments
 */
 
@@ -130,7 +130,7 @@ function wpatt_content_filter( $content, $post = null ) {
 
         $content_l .= '<!-- WP Attachments -->
         <div style="width:100%;margin:10px 0 10px 0;">
-            <h3>' . $orderby_html . get_option('wpatt_option_localization') . '</h3>
+            <h3>' . $orderby_html . sanitize_text_field( get_option('wpatt_option_localization') ). '</h3>
         <ul class="post-attachments">';
 
         foreach ($attachments as $attachment)
@@ -182,12 +182,12 @@ function wpatt_content_filter( $content, $post = null ) {
             } else {
                 $url = wp_get_attachment_url($attachment->ID);
             }
-            $wpattachments_string = str_replace("%URL%", $url, $wpattachments_string);
-            $wpattachments_string = str_replace("%TITLE%", $attachment->post_title, $wpattachments_string);
+            $wpattachments_string = str_replace("%URL%", esc_url( $url ), $wpattachments_string);
+            $wpattachments_string = str_replace("%TITLE%", sanitize_text_field( $attachment->post_title ), $wpattachments_string);
             $wpattachments_string = str_replace("%SIZE%", $wpatt_fs, $wpattachments_string);
             $wpattachments_string = str_replace("%DATE%", $wpatt_date->format(get_option('wpatt_option_date_localization')), $wpattachments_string);
-            $wpattachments_string = str_replace("%CAPTION%", $attachment->post_excerpt, $wpattachments_string);
-            $wpattachments_string = str_replace("%DESCRIPTION%", $attachment->post_content, $wpattachments_string);
+            $wpattachments_string = str_replace("%CAPTION%", sanitize_text_field( $attachment->post_excerpt ), $wpattachments_string);
+            $wpattachments_string = str_replace("%DESCRIPTION%", sanitize_text_field( $attachment->post_content ), $wpattachments_string);
             $wpattachments_string = str_replace("%AUTHOR%", get_the_author_meta( 'display_name', $attachment->post_author), $wpattachments_string);
 
             $wpattachments_string = str_replace("%DOWNLOADS%", wpa_get_downloads($attachment->ID), $wpattachments_string);
