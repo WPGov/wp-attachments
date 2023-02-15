@@ -107,7 +107,7 @@
 
         <td><input type="text" name="wpatt_option_localization_n" value="';
     
-    echo get_option('wpatt_option_localization');
+    echo esc_html(get_option('wpatt_option_localization'));
     
     echo '" />&nbsp;' . __('Attachments list title','wp-attachments') . '<br>
     <input type="checkbox" name="wpatt_show_orderby_n" ';
@@ -119,7 +119,7 @@
        
     <tr valign="top">
         <th scope="row">' . __('Date Format') . '</th>
-        <td><input type="text" name="wpatt_option_date_localization_n" value="'.get_option('wpatt_option_date_localization').'" />&nbsp;'
+        <td><input type="text" name="wpatt_option_date_localization_n" value="'.esc_html(get_option('wpatt_option_date_localization')).'" />&nbsp;'
         .__('The format for dates','wp-attachments') . '<small> ('.strtolower(__('Default')).': <code>d.m.Y</code>)</small></td></tr>';
     
         echo '<tr><th scope="row">' . __('Include images','wp-attachments') . '</th>

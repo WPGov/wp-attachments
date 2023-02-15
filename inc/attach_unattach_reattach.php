@@ -62,7 +62,7 @@ function unattach_do_it() {
 		$wpdb->update($wpdb->posts, array('post_parent'=>0), array('id'=>$_REQUEST['id'], 'post_type'=>'attachment'));
 	}
 	
-	wp_redirect($_SERVER[HTTP_REFERER]);
+	wp_redirect( 'upload.php?mode=list' );
 	exit;
 }
 

@@ -130,7 +130,7 @@ function wpatt_content_filter( $content, $post = null ) {
 
         $content_l .= '<!-- WP Attachments -->
         <div style="width:100%;margin:10px 0 10px 0;">
-            <h3>' . $orderby_html . sanitize_text_field( get_option('wpatt_option_localization') ). '</h3>
+            <h3>' . $orderby_html . esc_html(sanitize_text_field( get_option('wpatt_option_localization') )). '</h3>
         <ul class="post-attachments">';
 
         foreach ($attachments as $attachment)
