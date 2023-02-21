@@ -104,6 +104,8 @@ class IJ_Post_Attachments
 		if ($hook_suffix != 'post.php')
 			return;
 
+		wp_enqueue_media();
+
 		wp_enqueue_script(
 			'ij-post-attachments', IJ_POST_ATTACHMENTS_URL . 'scripts/ij-post-attachments.js',
 			array('jquery-ui-sortable'), IJ_POST_ATTACHMENTS_VER
