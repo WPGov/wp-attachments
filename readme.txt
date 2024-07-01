@@ -1,11 +1,11 @@
 === WP Attachments ===
 Contributors: Milmor
-Tags: attach, attachments, automatic, editor, page, post, woocommerce, better, media, file, word, excel, pdf, show, post, page, fast, simple, easy, media, files, list, plugin, related, shortcode, uploaded, simple, metabox, classicpress
+Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco
 Requires at least: 4.4
 Tested up to: 6.5
-Version: 5.0.10
-Stable tag: 5.0.10
+Version: 5.0.11
+Stable tag: 5.0.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
