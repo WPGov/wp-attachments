@@ -1,124 +1,138 @@
 === WP Attachments ===
-Contributors: Milmor
-Tags: attachments, media, file, list, classicpress
-Donate link: https://www.paypal.me/milesimarco
-Requires at least: 4.4
-Tested up to: 6.6
-Version: 5.0.12
-Stable tag: 5.0.12
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Contributors: Milmor  
+Tags: attachments, media, file, list, classicpress  
+Donate link: https://www.paypal.me/milesimarco  
+Requires at least: 4.4  
+Tested up to: 6.6  
+Version: 5.1  
+Stable tag: 5.1  
+License: GPLv2 or later  
+License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
-Powerful solution to manage and show your WordPress media in posts and pages
+A powerful solution to manage and display your WordPress media attachments in posts and pages.
 
 == Description ==
 
-WP Attachments is a plugin that enhance the download experience and file managing in WordPress. It adds some features for attachments and **automagically** shows them in posts and pages.
-When you upload a file, the download link will be automatically shown after the content without manual insert of the html link in the content.
-Includes utilities for **attaching, unattaching or reattaching** assets in the media library.
+WP Attachments enhances the download experience and file management in WordPress. It automatically displays attachments in your posts and pages, so you don’t need to manually insert download links.  
+Easily attach, unattach, or reattach files directly from the media library.
 
-https://www.youtube.com/watch?v=J7gf0hxl_z8
+**New in 5.1:**
+- 🚀 Major code refactoring for improved stability and maintainability
+- ⚡ Significant performance improvements
+- 🔒 Enhanced security throughout the plugin
+- 🛡️ Improved admin capabilities and permission handling
+- 🆕 Brand new metabox for easier attachment management
+- 🗂️ Refreshed admin columns for better overview and usability
 
-Demo: [www.sanpellegrinoterme.gov.it](http://www.sanpellegrinoterme.gov.it/documenti/regolamenti/)
+**Key Features:**
+- 🤖 Automatically displays attachments after post content
+- ℹ️ Backend metabox for managing attachments
+- 🔃 Quick Attach, Unattach, and Reattach actions in the Media Library
+- 🔢 Download counter with anti-spam and logged-in user filtering
+- 🧑‍💻 Developer hooks and filters for customization
+- 🛍️ WooCommerce compatible
+- 🎨 Five icon packs to choose from
+- 📜 Supports posts, pages, and custom post types
+- 🎢 Customizable themes (title, date, size, caption, and more)
 
-= Main Features =
-🤖 Automatic function to show your attachments
-ℹ️ Backend writing **metabox**
-🔃 Fast **Attach**, **Unattach** and **Reattach** files in the "Media" menu
-🔢 Download **counter** with anti-spamming system and logged users filter
-🧑‍💻 Developer hooks and filters
-🛍️ WooCommerce compatibile
-🎨 **5 icon packs** to choose from
-📜 Support for **pages**, **posts** and **custom post types**
-🎢 Customizable themes with many options (title, date, size, caption...)
+[Video Overview](https://www.youtube.com/watch?v=J7gf0hxl_z8)
 
-= Contributions =
+== Contributions ==
 
-* WP Attachments is part of the project [WPGov.it](http://www.wpgov.it), that aims to give Italian Public Government powerful open source solutions to make complete and law-compatible websites.
-* Italian community [Porte Aperte sul Web](http://www.porteapertesulweb.it) for beta-testing and ideas.
-* Metabox based on [IJ Post Attachments](http://wordpress.org/plugins/ij-post-attachments/)
-* Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/).
+- Part of [WPGov.it](http://www.wpgov.it), providing open source solutions for Italian Public Government websites.
+- Thanks to the Italian community [Porte Aperte sul Web](http://www.porteapertesulweb.it) for beta testing and ideas.
+- Metabox based on [IJ Post Attachments](http://wordpress.org/plugins/ij-post-attachments/)
+- Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/).
 
 == Installation ==
 
-1. Install the plugin either via the WordPress.org plugin directory, or by uploading the files to your server
-
-2. After activating, you've all done. If you want to customize it, please have a look to Settings -> WP Attachments
-
-3. You will also notice a new metabox while editing a post, page or whatever custom post type. In addition you can find new features in the media page: "Attach"+"Reattach"
+1. Install via the WordPress.org plugin directory or upload the files to your server.
+2. Activate the plugin. To customize, go to **Settings → WP Attachments**.
+3. While editing a post, page, or custom post type, you’ll see a new metabox for managing attachments. Additional features are available in the Media Library: Attach, Reattach.
 
 == Frequently Asked Questions ==
 
-= How can i hide the list for a certain page? =
-While in the edit screen, you will see the plugin metabox that lists every file uploaded to the content. At the bottom-right of this metabox you can easily turn off the automatic listing by checking **Disable**. 
+= How can I hide the attachment list for a specific page? =
+In the edit screen, use the plugin’s metabox to disable the automatic listing by checking **Disable** at the bottom right.
 
-= How can i avoid double listing? =
-When you upload a file, you usually click to insert the link in the content. Please note that this action is not required with WP Attachments. When you upload a file, WordPress assigns it to the content ID (even if its link is not inserted as html) and WP Attachments will show it. Instead of clicking "Insert in this page", just click "X" in the upper right corner of the media popup. The file will still be there, and this plugin will show it!
+= How can I avoid double listing? =
+You don’t need to insert file links manually. When you upload a file, it’s automatically assigned to the content and displayed by WP Attachments. Just close the media popup after uploading.
 
-= How can i reorder files? =
-Just drag them while editing the page (in WP Attachments metabox or Media Popup)
+= How can I reorder files? =
+Drag and drop attachments in the WP Attachments metabox or Media Popup while editing.
 
 = Developer Filters =
-WP Attachments includes many filters to allow developers easily change its behaviour :)
+WP Attachments includes many filters for developers:
 
-* **wpatt_list_html** ~ list output ($html > $html)
-* **wpatt_before_entry_html** ~ single entry output (before %TAG% parsing) ($html > $html)
-* **wpatt_after_entry_html** ~ single entry output (after %TAG% parsing) ($html > $html)
-* **wpatt_accepted_formats** ~ alter files to shows ($mime > $boolean)
+- **wpatt_list_html** — Filter the entire list output (`$html`)
+- **wpatt_before_entry_html** — Filter single entry output before tag parsing (`$html`)
+- **wpatt_after_entry_html** — Filter single entry output after tag parsing (`$html`)
+- **wpatt_accepted_formats** — Filter which files are shown (`$mime`)
 
-Examples:
+**Examples:**
 
-`function my_custom_function( $html ) { //Alter final html
+```php
+function my_custom_function( $html ) {
+    // Alter final HTML
     return $new_html;
 }
-add_filter( 'wpatt_list_html', 'my_custom_function' );`
+add_filter( 'wpatt_list_html', 'my_custom_function' );
+```
 
-`function my_custom_function( $mime ) { //This snippet shows only PDF in the list
-    if ( $mime == 'applicationpdf') {
-        return true;
-    }
-	return false;
+```php
+function my_custom_function( $mime ) {
+    // Only show PDFs in the list
+    return $mime == 'application/pdf';
 }
-add_filter( 'wpatt_accepted_formats', 'my_custom_function' );`
-
+add_filter( 'wpatt_accepted_formats', 'my_custom_function' );
+```
 
 == Screenshots ==
 
-1. The list generated
-
+1. The generated attachment list
 2. Simple and intuitive options
-
 3. Demo from [www.sanpellegrinoterme.gov.it](http://www.sanpellegrinoterme.gov.it)
-
-4. Metabox (back-end)
-
-5. WP Attachments allows you to attach, unattach and reattach files in "Media" screen
+4. Backend metabox
+5. Attach, unattach, and reattach files in the Media screen
 
 
 == Changelog ==
 
-= 5.0.6 20230215 =
+= 5.1 2025-05-25 =
+* Date placeholders in attachment templates now use the WordPress date format setting (`Settings > General > Date Format`) for better localization and consistency.
+* Improved templating: You can now use WordPress date formatting in your custom templates, and templating settings are more flexible and reliable.
+* Other minor fixes and improvements.
+* Major code refactoring for improved stability and maintainability
+* Significant performance improvements
+* Enhanced security throughout the plugin
+* Improved admin capabilities and permission handling
+* Brand new metabox for easier attachment management
+* Refreshed admin columns for better overview and usability
+
+= 5.0.12 =
+* Latest stable release
+
+= 5.0.6 2023-02-15 =
 * Compatibility check
 * Security fixes
 * Minor changes
 
-= 5.0.4 20211020 =
+= 5.0.4 2021-10-20 =
 * Compatibility check
-* Linked development workflows on Github - https://github.com/WPGov/wp-attachments
+* Linked development workflows on [GitHub](https://github.com/WPGov/wp-attachments)
 * Minor changes
 
-= 5.0 20201128 =
-* **WooCommerce** compatibile: add files to your clients' orders
-* Huge improvements and technical changes under the hood
-* Rewritten add_media popup, with custom behaviour
-* Removed various files, including old translation .po translation files
-* Added support for native translate.wordpress.org translation system. Help us!
+= 5.0 2020-11-28 =
+* WooCommerce compatibility: add files to client orders
+* Major improvements and technical changes
+* Rewritten add_media popup with custom behavior
+* Removed old translation files, now using translate.wordpress.org
 * Minor changes
 
-= 4.4.2 20200429 =
+= 4.4.2 2020-04-29 =
 * Minor improvements
 
-= 4.4.1 20200220 =
+= 4.4.1 2020-02-20 =
 * Compatibility check
 
 = Version 4.4 18/11/2017 =
