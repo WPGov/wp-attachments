@@ -3,9 +3,9 @@ Contributors: Milmor
 Tags: attachments, media, file, list, classicpress  
 Donate link: https://www.paypal.me/milesimarco  
 Requires at least: 4.4  
-Tested up to: 6.6  
-Version: 5.1.1
-Stable tag: 5.1.1  
+Tested up to: 6.9
+Version: 5.1.2
+Stable tag: 5.1.2  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
