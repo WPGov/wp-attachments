@@ -4,8 +4,8 @@ Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco  
 Requires at least: 4.4  
 Tested up to: 6.6  
-Version: 5.1  
-Stable tag: 5.1  
+Version: 5.1.1
+Stable tag: 5.1.1  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -15,14 +15,6 @@ A powerful solution to manage and display your WordPress media attachments in po
 
 WP Attachments enhances the download experience and file management in WordPress. It automatically displays attachments in your posts and pages, so you don’t need to manually insert download links.  
 Easily attach, unattach, or reattach files directly from the media library.
-
-**New in 5.1:**
-- 🚀 Major code refactoring for improved stability and maintainability
-- ⚡ Significant performance improvements
-- 🔒 Enhanced security throughout the plugin
-- 🛡️ Improved admin capabilities and permission handling
-- 🆕 Brand new metabox for easier attachment management
-- 🗂️ Refreshed admin columns for better overview and usability
 
 **Key Features:**
 - 🤖 Automatically displays attachments after post content
