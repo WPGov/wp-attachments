@@ -4,8 +4,8 @@ Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco  
 Requires at least: 4.4  
 Tested up to: 6.9
-Version: 5.1.2
-Stable tag: 5.1.2  
+Version: 5.2
+Stable tag: 5.2
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -89,6 +89,11 @@ add_filter( 'wpatt_accepted_formats', 'my_custom_function' );
 
 
 == Changelog ==
+
+= 5.2 2025-06-09 =
+* Fixed regression with images (thanks @reesher + @steeltape for feedback)
+* Added option to enable/disable for specific custom post types (completely or only frontend)
+* Other minor fixes and improvements.
 
 = 5.1 2025-05-25 =
 * Date placeholders in attachment templates now use the WordPress date format setting (`Settings > General > Date Format`) for better localization and consistency.

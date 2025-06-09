@@ -5,7 +5,7 @@ Plugin URI:   https://wordpress.org/plugins/wp-attachments
 Description: Powerful solution to manage and show your WordPress media in posts and pages
 Author: Marco Milesi
 Author URI:   https://www.marcomilesi.com
-Version: 5.1.2
+Version: 5.2
 Text Domain: wp-attachments
 */
 
@@ -84,8 +84,13 @@ function wpatt_content_filter( $content, $post = null ) {
     if ( !$post ) {
         global $post;
     }
-
+    
     if ( !is_object($post) || empty($post->ID) || get_post_meta($post->ID, 'wpa_off', true) || post_password_required() || ( get_option('wpatt_option_restrictload') && !is_single() && !is_page() ) ) {
+        return $content;
+    }
+
+    $enabled = get_option('wpatt_enable_metabox_' . $post->post_type, '1');
+    if ( $enabled !== '1' ) {
         return $content;
     }
 
@@ -110,6 +115,8 @@ function wpatt_content_filter( $content, $post = null ) {
         'post_status'    => 'any',
         'post_parent'    => $post->ID
     ));
+
+    $toShow = 0;
 
     $orderby_html = '';
     if ( get_option('wpatt_show_orderby') != 0 && count($attachments) > 1 ) {
@@ -183,9 +190,12 @@ function wpatt_content_filter( $content, $post = null ) {
             $wpattachments_string = str_replace("%DOWNLOADS%", intval(wpa_get_downloads($attachment->ID)), $wpattachments_string);
 
             $content_l .= '<li class="' . esc_attr($class) . '">' . apply_filters( 'wpatt_after_entry_html', $wpattachments_string ) . '</li>';
+            $toShow = 1;
         }
         $content_l .= '</ul></div>';
-        $content .= apply_filters( 'wpatt_list_html', $content_l );
+        if ( $toShow ) {
+            $content .= apply_filters( 'wpatt_list_html', $content_l );
+        }
     }
     return $content;
 }

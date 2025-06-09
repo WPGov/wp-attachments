@@ -32,13 +32,10 @@ class WP_Attachments
     {
         // Get all post types that support attachments
         $post_types = get_post_types(array('public' => true), 'names');
-        
         foreach ($post_types as $post_type) {
-            // Skip attachment post type
-            if ($post_type === 'attachment') {
-                continue;
-            }
-            
+            if ($post_type === 'attachment') continue;
+            // Check if enabled for this post type
+            if (get_option('wpatt_enable_metabox_' . $post_type, '1') !== '1') continue;
             add_meta_box(
                 'wpa-attachments',
                 __('Media Attachments', 'wp-attachments'),
@@ -47,7 +44,7 @@ class WP_Attachments
                 'normal',
                 'high',
                 array(
-                    '__back_compat_meta_box' => false, // Set to false to prevent double rendering
+                    '__back_compat_meta_box' => false,
                     '__block_editor_compatible_meta_box' => true
                 )
             );
@@ -247,6 +244,18 @@ class WP_Attachments
                 }
             }
         }
+
+        // Get default ON/OFF for this post type
+        $default_on = get_option('wpatt_enable_display_' . $post->post_type, '1');
+        $is_off = get_post_meta($post->ID, 'wpa_off', true);
+        // If meta not set, use default
+        if ( $is_off == 1 ) {
+            // Disabled by user
+        } else if (in_array($post->post_status, array('auto-draft', 'draft', 'new'))) {
+            $is_off = ($default_on === '1') ? '' : '1';
+        } else {
+            $is_off = ($default_on === '1') ? '' : '1';
+        }
         ?>
 
         <div class="wpa-attachments-wrapper">
@@ -340,11 +349,9 @@ class WP_Attachments
 
             <div class="wpa-attachments-footer">
                 <div class="wpa-toggle-wrapper">
-                    <input type="checkbox" id="wpa_off_n" name="wpa_off" 
-                           <?php checked(get_post_meta($post->ID, 'wpa_off', true)); ?> />
-                    <label for="wpa_off_n"><?php _e('Disable attachments display', 'wp-attachments'); ?></label>
+                    <input type="checkbox" id="wpa_off_n" name="wpa_off" <?php checked(!$is_off); ?> />
+                    <label for="wpa_off_n"><?php _e('Display attachments in frontend', 'wp-attachments'); ?></label>
                 </div>
-                
                 <div class="wpa-attachments-footer-buttons">
                     <button class="button button-primary add_media wpa_attach_file" title="<?php esc_attr_e('Add Media', 'wp-attachments'); ?>">
                         <?php _e('Add Media', 'wp-attachments'); ?>
@@ -361,6 +368,8 @@ class WP_Attachments
                 <div id="wpa-preview-file" class="wpa-preview-file"></div>
             </div>
         </div>
+
+        <input type="hidden" name="wpa_checkfieldpreventautosaveonnewcpt" value="1" />
 
         <?php
         wp_reset_postdata();
@@ -503,7 +512,15 @@ add_action('save_post', function($post_id) {
     if (empty($post_id) || !current_user_can('edit_post', $post_id)) {
         return;
     }
-    update_post_meta($post_id, "wpa_off", isset($_POST["wpa_off"]));
+    if (!isset($_POST['wpa_checkfieldpreventautosaveonnewcpt'])) {
+        // Don't update meta if our box wasn't submitted (e.g. auto-draft)
+        return;
+    }
+    if ( isset($_POST["wpa_off"]) ) {
+        delete_post_meta($post_id, "wpa_off");
+    } else {
+        update_post_meta($post_id, "wpa_off", isset($_POST["wpa_off"]) ? '' : '1');
+    }
 });
 
 add_action('plugins_loaded', function() {
