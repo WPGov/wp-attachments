@@ -387,6 +387,15 @@ class WP_Attachments
         if (!$attachment_id || !$post_id) {
             wp_send_json_error('Missing data');
         }
+        
+        // Object-level authorization: verify user can edit both the target post and the attachment
+        if (!current_user_can('edit_post', $post_id)) {
+            wp_send_json_error('Permission denied: cannot edit target post');
+        }
+        if (!current_user_can('edit_post', $attachment_id)) {
+            wp_send_json_error('Permission denied: cannot edit attachment');
+        }
+        
         wp_update_post(array(
             'ID' => $attachment_id,
             'post_parent' => $post_id

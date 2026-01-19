@@ -5,13 +5,13 @@ Plugin URI:   https://wordpress.org/plugins/wp-attachments
 Description: Powerful solution to manage and show your WordPress media in posts and pages
 Author: Marco Milesi
 Author URI:   https://www.marcomilesi.com
-Version: 5.2
+Version: 5.2.1
 Text Domain: wp-attachments
 */
 
 require_once( plugin_dir_path(__FILE__) . 'inc/attach_unattach_reattach.php' );
 
-function wpa_action_init() {
+add_action('init', function () {
     load_plugin_textdomain( 'wp-attachments' );
 
     // Only process download if counter is enabled and download param is present
@@ -39,8 +39,7 @@ function wpa_action_init() {
 
     $wpa_ict = (int) get_option('wpa_ict', 0);
     wp_enqueue_style('wpa-css', plugin_dir_url(__FILE__) . 'styles/' . $wpa_ict . '/wpa.css');
-}
-add_action('init', 'wpa_action_init');
+} );
 
 add_action('admin_init', function() {
     load_plugin_textdomain( 'wp-attachments', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
