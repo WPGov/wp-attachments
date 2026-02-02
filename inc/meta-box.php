@@ -343,7 +343,9 @@ class WP_Attachments
                 <div class="wpa-no-attachments">
                     <div class="dashicons dashicons-admin-media"></div>
                     <h4><?php _e('No media attachments found', 'wp-attachments'); ?></h4>
-                    <p><?php _e('Click "Add Media" below to attach files to this post.', 'wp-attachments'); ?></p>
+                    <?php if (current_user_can('upload_files')): ?>
+                        <p><?php _e('Click "Add Media" below to attach files to this post.', 'wp-attachments'); ?></p>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 
@@ -353,9 +355,11 @@ class WP_Attachments
                     <label for="wpa_off_n"><?php _e('Display attachments in frontend', 'wp-attachments'); ?></label>
                 </div>
                 <div class="wpa-attachments-footer-buttons">
-                    <button class="button button-primary add_media wpa_attach_file" title="<?php esc_attr_e('Add Media', 'wp-attachments'); ?>">
-                        <?php _e('Add Media', 'wp-attachments'); ?>
-                    </button>
+                    <?php if (current_user_can('upload_files')): ?>
+                        <button class="button button-primary add_media wpa_attach_file" title="<?php esc_attr_e('Add Media', 'wp-attachments'); ?>">
+                            <?php _e('Add Media', 'wp-attachments'); ?>
+                        </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -379,7 +383,7 @@ class WP_Attachments
     public function wp_ajax_wpa_attach_media() // renamed from ij_attach_media
     {
         check_ajax_referer('wpa-attachments-nonce', 'nonce');
-        if (!current_user_can('edit_posts')) {
+        if (!current_user_can('upload_files')) {
             wp_send_json_error('Permission denied');
         }
         $attachment_id = intval($_POST['attachment_id']);

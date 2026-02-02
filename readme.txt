@@ -4,8 +4,8 @@ Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco  
 Requires at least: 4.4  
 Tested up to: 6.9
-Version: 5.2.1
-Stable tag: 5.2.1
+Version: 5.3
+Stable tag: 5.3
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -90,6 +90,9 @@ add_filter( 'wpatt_accepted_formats', 'my_custom_function' );
 
 == Changelog ==
 
+= 5.3 2026-02-02 =
+* Better permission handling
+* Redesigned settings screen
 
 = 5.2.1 2026-01-19 =
 * Minor fixes and improvements.
