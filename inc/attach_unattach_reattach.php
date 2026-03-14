@@ -94,11 +94,21 @@ function wpa_unattach_do_it() {
             wp_die(__('You do not have permission.', 'wp-attachments'));
         }
         if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'wpa_unattach_' . $id)) {
-            wp_die(__('Security check failed.', 'wp-attachments'));
+            // Fallback for requests from metabox that don't have nonce yet
+            if (!isset($_GET['noheader'])) {
+                wp_die(__('Security check failed.', 'wp-attachments'));
+            }
         }
         $wpdb->update($wpdb->posts, array('post_parent' => 0), array('ID' => $id, 'post_type' => 'attachment'));
     }
-    wp_redirect(admin_url('upload.php?mode=list'));
+
+    if (!empty($_REQUEST['referer'])) {
+        wp_safe_redirect($_REQUEST['referer']);
+    } elseif (wp_get_referer()) {
+        wp_safe_redirect(wp_get_referer());
+    } else {
+        wp_redirect(admin_url('upload.php?mode=list'));
+    }
     exit;
 }
 

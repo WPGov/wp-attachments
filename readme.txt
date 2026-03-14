@@ -2,10 +2,10 @@
 Contributors: Milmor  
 Tags: attachments, media, file, list, classicpress  
 Donate link: https://www.paypal.me/milesimarco  
-Requires at least: 4.4  
+Requires at least: 4.4
 Tested up to: 6.9
-Version: 5.3
-Stable tag: 5.3
+Version: 5.3.1
+Stable tag: 5.3.1
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -89,6 +89,9 @@ add_filter( 'wpatt_accepted_formats', 'my_custom_function' );
 
 
 == Changelog ==
+
+= 5.3.1 2026-03-14 =
+* Minor fixes and improvements.
 
 = 5.3 2026-02-02 =
 * Better permission handling

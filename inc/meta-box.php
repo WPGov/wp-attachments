@@ -71,12 +71,15 @@ class WP_Attachments
 
         // Add script for Gutenberg compatibility
         wp_add_inline_script('wp-attachments', '
-            wp.domReady(function() {
-                // Re-initialize metabox functionality after Gutenberg loads
-                if (window.WP_Attachments && typeof window.WP_Attachments.init === "function") {
-                    window.WP_Attachments.init();
-                }
-            });
+            (function($) {
+                $(function() {
+                    // Re-initialize metabox functionality after Gutenberg loads
+                    if (window.WP_Attachments && typeof window.WP_Attachments.init === "function" && !window.WP_Attachments_initialized) {
+                        window.WP_Attachments.init();
+                        window.WP_Attachments_initialized = true;
+                    }
+                });
+            })(jQuery);
         ');
 
         wp_localize_script('wp-attachments', 'WP_Attachments_Vars', array(
@@ -322,15 +325,14 @@ class WP_Attachments
                                     <span class="dashicons dashicons-edit"></span>
                                     <span class="screen-reader-text"><?php _e('Edit', 'wp-attachments'); ?></span>
                                 </a>
-                                <a href="<?php echo esc_url(admin_url("tools.php?page=unattach&noheader=true&id=$attachment_id")); ?>"
-                                   class="button button-secondary"
+                                <a href="<?php echo esc_url(admin_url("tools.php?page=unattach&noheader=true&id=$attachment_id&referer=" . urlencode(remove_query_arg(array('message'))))); ?>"
+                                   class="button button-secondary wpa-unattach-action"
                                    title="<?php esc_attr_e('Unattach', 'wp-attachments'); ?>">
                                     <span class="dashicons dashicons-editor-unlink"></span>
                                     <span class="screen-reader-text"><?php _e('Unattach', 'wp-attachments'); ?></span>
                                 </a>
-                                <a href="<?php echo esc_url(get_delete_post_link($attachment_id)); ?>"
-                                   class="button button-secondary"
-                                   onclick="return confirm('<?php echo esc_js(__('Are you sure you want to delete this permanently?', 'wp-attachments')); ?>');"
+                                <a href="<?php echo esc_url(add_query_arg('forcedelete', 'true', get_delete_post_link($attachment_id, '', true))); ?>"
+                                   class="button button-secondary wpa-delete-action"
                                    title="<?php esc_attr_e('Delete', 'wp-attachments'); ?>">
                                     <span class="dashicons dashicons-trash"></span>
                                     <span class="screen-reader-text"><?php _e('Delete', 'wp-attachments'); ?></span>
@@ -497,15 +499,14 @@ class WP_Attachments
                     <span class="dashicons dashicons-edit"></span>
                     <span class="screen-reader-text"><?php _e('Edit', 'wp-attachments'); ?></span>
                 </a>
-                <a href="<?php echo esc_url(admin_url("tools.php?page=unattach&noheader=true&id=$attachment_id")); ?>"
-                   class="button button-secondary"
+                <a href="<?php echo esc_url(admin_url("tools.php?page=unattach&noheader=true&id=$attachment_id&referer=" . urlencode(remove_query_arg(array('message'))))); ?>"
+                   class="button button-secondary wpa-unattach-action"
                    title="<?php esc_attr_e('Unattach', 'wp-attachments'); ?>">
                     <span class="dashicons dashicons-editor-unlink"></span>
                     <span class="screen-reader-text"><?php _e('Unattach', 'wp-attachments'); ?></span>
                 </a>
-                <a href="<?php echo esc_url(get_delete_post_link($attachment_id)); ?>"
-                   class="button button-secondary"
-                   onclick="return confirm('<?php echo esc_js(__('Are you sure you want to delete this permanently?', 'wp-attachments')); ?>');"
+                <a href="<?php echo esc_url(add_query_arg('forcedelete', 'true', get_delete_post_link($attachment_id, '', true))); ?>"
+                   class="button button-secondary wpa-delete-action"
                    title="<?php esc_attr_e('Delete', 'wp-attachments'); ?>">
                     <span class="dashicons dashicons-trash"></span>
                     <span class="screen-reader-text"><?php _e('Delete', 'wp-attachments'); ?></span>

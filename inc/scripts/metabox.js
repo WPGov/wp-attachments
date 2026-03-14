@@ -48,8 +48,8 @@ var WP_Attachments = (function($) {
             $(document).on('keydown', this.handleKeyEvents.bind(this));
             
             // Unattach and delete confirmations
-            $(document).on('click', 'a[href*="unattach"], a[href*="delete"]', function(e) {
-                var isDelete = $(this).attr('href').indexOf('delete') !== -1;
+            $(document).on('click', '.wpa-unattach-action, .wpa-delete-action', function(e) {
+                var isDelete = $(this).hasClass('wpa-delete-action');
                 var message = isDelete ? 
                     'Are you sure you want to delete this permanently?' : 
                     self.youSureText;
@@ -114,23 +114,40 @@ var WP_Attachments = (function($) {
                 button: {
                     text: 'Attach to Post'
                 },
-                multiple: true,
-                library: {
-                    type: 'all'
-                }
+                multiple: true
             });
 
             this.mediaFrame.on('select', function() {
-                var attachments = self.mediaFrame.state().get('selection').toJSON();
-                var postId = self.postID;
+                var selection = self.mediaFrame.state().get('selection');
+                var postId = parseInt(self.postID);
 
                 if (!postId) {
                     alert('Please save the post first before adding attachments.');
                     return;
                 }
 
-                attachments.forEach(function(attachment) {
-                    self.attachFileToPost(attachment.id, postId);
+                selection.each(function(attachment) {
+                    // Try to get parent ID from multiple possible locations
+                    var attributes = attachment.attributes;
+                    var currentParent = parseInt(attributes.uploadedTo || attributes.parent || 0);
+                    var attachmentTitle = attributes.title || 'this file';
+                    var proceed = true;
+
+                    // If file has a parent and it's not the current post
+                    // Note: currentParent might be a string like "123" or "0"
+                    if (currentParent > 0 && currentParent !== postId) {
+                        var parentTitle = attributes.uploadedToTitle || (attributes.parentObj ? attributes.parentObj.post_title : 'another content');
+                        
+                        proceed = confirm(
+                            'The file "' + attachmentTitle + '" is already attached to "' + parentTitle + '" (ID: ' + currentParent + ').\n' +
+                            'By attaching it here, it will be unattached from its original location.\n\n' +
+                            'Do you want to proceed?'
+                        );
+                    }
+                    
+                    if (proceed) {
+                        self.attachFileToPost(attachment.id, postId);
+                    }
                 });
             });
 
@@ -297,7 +314,10 @@ var WP_Attachments = (function($) {
     
     // Initialize when document is ready
     $(document).ready(function() {
-        attachments.init();
+        if (!window.WP_Attachments_initialized) {
+            attachments.init();
+            window.WP_Attachments_initialized = true;
+        }
         
         // Re-initialize after AJAX requests that might add new content
         $(document).ajaxComplete(function(event, xhr, settings) {

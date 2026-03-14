@@ -5,7 +5,7 @@ Plugin URI:   https://wordpress.org/plugins/wp-attachments
 Description: Powerful solution to manage and show your WordPress media in posts and pages
 Author: Marco Milesi
 Author URI:   https://www.marcomilesi.com
-Version: 5.3
+Version: 5.3.3
 Text Domain: wp-attachments
 */
 
@@ -39,7 +39,24 @@ add_action('init', function () {
 
     $wpa_ict = (int) get_option('wpa_ict', 0);
     wp_enqueue_style('wpa-css', plugin_dir_url(__FILE__) . 'styles/' . $wpa_ict . '/wpa.css');
-} );
+});
+
+/**
+ * Handle redirect after deleting an attachment from the metabox
+ */
+add_action('deleted_post', function($post_id, $post) {
+    if ($post->post_type !== 'attachment') {
+        return;
+    }
+
+    if (isset($_REQUEST['forcedelete']) && $_REQUEST['forcedelete'] === 'true') {
+        $referer = wp_get_referer();
+        if ($referer && strpos($referer, 'post.php') !== false) {
+            wp_safe_redirect(remove_query_arg('message', $referer));
+            exit;
+        }
+    }
+}, 10, 2);
 
 add_action('admin_init', function() {
     load_plugin_textdomain( 'wp-attachments', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
