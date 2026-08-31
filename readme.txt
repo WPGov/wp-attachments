@@ -4,8 +4,8 @@ Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco
 Requires at least: 4.4
 Requires PHP: 7.4
-Tested up to: 7.1
-Version: 6.0.1
+Tested up to: 7.2
+Version: 6.0.2
 Stable tag: 6.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -114,20 +114,15 @@ There is also `wpatt_get_attachments_html( $parent_id )`, which returns the list
 
 == Screenshots ==
 
-1. The generated attachment list
-2. Simple and intuitive options
-3. Demo from [www.sanpellegrinoterme.gov.it](http://www.sanpellegrinoterme.gov.it)
-4. Backend metabox
-5. Attach, unattach, and reattach files in the Media screen
-
-== Upgrade Notice ==
-
-= 6.0 =
-Requires PHP 7.4. If you use a custom template, note that %DATE% now renders as a span instead of a floated div.
+1. The attachment list, built automatically from the files attached to the post
+2. General settings: list header, display options, download tracker and per post type permissions
+3. The same list in context, on a page of a demo site
+4. The Media Attachments metabox: manage, preview and reorder files without leaving the editor
+5. Attach, Unattach and Re-Attach files straight from the Media Library
 
 == Changelog ==
 
-= 6.0 2026-08-31 =
+= 6.0.2 2026-08-31 =
 
 * **New:** a Files column in the post, page and custom post type lists shows how many files are attached to each one, and links straight to them in the Media Library.
 * **New:** the Edit action in the metabox now opens media modal in place, so titles, captions and alt text can be changed without leaving the editor.
