@@ -5,8 +5,8 @@ Donate link: https://www.paypal.me/milesimarco
 Requires at least: 4.4
 Requires PHP: 7.4
 Tested up to: 7.2
-Version: 6.0.2
-Stable tag: 6.0.1
+Version: 6.0.3
+Stable tag: 6.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -122,7 +122,7 @@ There is also `wpatt_get_attachments_html( $parent_id )`, which returns the list
 
 == Changelog ==
 
-= 6.0.2 2026-08-31 =
+= 6.0.3 2026-08-31 =
 
 * **New:** a Files column in the post, page and custom post type lists shows how many files are attached to each one, and links straight to them in the Media Library.
 * **New:** the Edit action in the metabox now opens media modal in place, so titles, captions and alt text can be changed without leaving the editor.

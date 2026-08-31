@@ -5,7 +5,7 @@ Plugin URI:   https://wordpress.org/plugins/wp-attachments
 Description: Powerful solution to manage and show your WordPress media in posts and pages
 Author: Marco Milesi
 Author URI:   https://www.marcomilesi.com
-Version: 6.0.2
+Version: 6.0.3
 Requires at least: 4.4
 Requires PHP: 7.4
 License: GPLv2 or later
