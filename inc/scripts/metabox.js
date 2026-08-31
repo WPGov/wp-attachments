@@ -6,9 +6,21 @@ var WP_Attachments = (function($) {
 
         init: function() {
             this.cacheElements();
+            this.detachModal();
             this.bindEvents();
             this.initSortable();
+            this.refreshMoveButtons();
             this.initializeFilePreview();
+        },
+
+        // The block editor renders metaboxes inside a transformed container.
+        // A transformed ancestor becomes the containing block for
+        // position:fixed, so the dialog would only cover the metabox panel
+        // instead of the viewport. Re-parenting it to <body> fixes that.
+        detachModal: function() {
+            if (this.$previewModal.length && this.$previewModal.parent()[0] !== document.body) {
+                this.$previewModal.appendTo(document.body);
+            }
         },
         
         cacheElements: function() {
@@ -18,11 +30,12 @@ var WP_Attachments = (function($) {
             this.$previewModal = $('#wpa-preview-modal');
             this.$previewContent = $('#wpa-preview-file');
             this.$previewTitle = $('#wpa-preview-title');
-            // No edit modal in new version
-            
+            this.$stats = $('#wpa-attachments-stats');
+
             // Cache localized variables
             this.editMediaTitle = WP_Attachments_Vars.editMedia || 'Edit Media';
             this.youSureText = WP_Attachments_Vars.youSure || 'Are you sure you want to do this?';
+            this.confirmDeleteText = WP_Attachments_Vars.confirmDelete || 'Are you sure you want to delete this permanently?';
             this.postID = WP_Attachments_Vars.postID || 0;
             this.ajaxurl = WP_Attachments_Vars.ajaxurl || '';
             this.nonce = WP_Attachments_Vars.nonce || '';
@@ -34,6 +47,59 @@ var WP_Attachments = (function($) {
             // Add media button click
             $(document).on('click', '.wpa_attach_file', this.handleAddMedia.bind(this));
             
+            // Visible move controls. Dragging alone is mouse-only and the grip
+            // on its own was not discoverable.
+            $(document).on('click', '.wpa-move-up, .wpa-move-down', function (e) {
+                e.preventDefault();
+                self.moveItem(
+                    $(this).closest('.wpa-attachment-item'),
+                    $(this).hasClass('wpa-move-up'),
+                    this
+                );
+            });
+
+            // Arrow keys on the grip do the same thing.
+            $(document).on('keydown', '.wpa-attachment-drag-handle', function (e) {
+                var isUp = (e.key === 'ArrowUp' || e.keyCode === 38);
+                var isDown = (e.key === 'ArrowDown' || e.keyCode === 40);
+                if (!isUp && !isDown) {
+                    return;
+                }
+
+                e.preventDefault();
+                self.moveItem($(this).closest('.wpa-attachment-item'), isUp, this);
+            });
+
+            // Edit: open the WordPress media modal instead of leaving the page.
+            // Core saves the fields through its own save-attachment endpoint,
+            // so there is no custom handler behind this.
+            $(document).on('click', '.wpa-edit-attachment', function (e) {
+                // Let modified clicks fall through to the full edit screen.
+                if (e.which > 1 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                    return;
+                }
+
+                var id = parseInt($(this).closest('.wpa-attachment-item').data('attachmentid'), 10);
+                if (!id || typeof wp === 'undefined' || !wp.media) {
+                    return; // no JS media library: the href still works
+                }
+
+                e.preventDefault();
+                self.openEditFrame(id);
+            });
+
+            // Preview triggers. Delegated, because rows arrive via AJAX too.
+            $(document).on('click', '.wpa-preview-trigger', function(e) {
+                e.preventDefault();
+                var $trigger = $(this);
+                self.previewFile(
+                    $trigger.data('url'),
+                    $trigger.data('mime'),
+                    $trigger.data('title'),
+                    this
+                );
+            });
+
             // Preview modal close buttons
             $(document).on('click', '.wpa-preview-close', this.closePreviewModal.bind(this));
             
@@ -50,46 +116,192 @@ var WP_Attachments = (function($) {
             // Unattach and delete confirmations
             $(document).on('click', '.wpa-unattach-action, .wpa-delete-action', function(e) {
                 var isDelete = $(this).hasClass('wpa-delete-action');
-                var message = isDelete ? 
-                    'Are you sure you want to delete this permanently?' : 
-                    self.youSureText;
+                var message = isDelete ? self.confirmDeleteText : self.youSureText;
                     
                 if (!confirm(message)) {
                     e.preventDefault();
                     return false;
                 }
             });
-            
-            // Handle attachment reordering on sortable stop
-            this.$container.on('sortstop', this.handleReorder.bind(this));
         },
         
-        initSortable: function() {
-            if (this.$container.length) {
-                this.$container.sortable({
-                    items: '.wpa-attachment-item',
-                    handle: '.wpa-attachment-drag-handle',
-                    cursor: 'move',
-                    opacity: 0.7,
-                    placeholder: 'wpa-attachment-item ui-sortable-placeholder',
-                    forcePlaceholderSize: true,
-                    tolerance: 'pointer',
-                    containment: 'parent',
-                    start: function(e, ui) {
-                        ui.item.addClass('ui-sortable-helper');
-                        ui.placeholder.height(ui.item.height());
-                    },
-                    stop: function(e, ui) {
-                        ui.item.removeClass('ui-sortable-helper');
-                        // Trigger reorder after sorting
-                        $(this).trigger('sortstop');
-                    },
-                    change: function(e, ui) {
-                        // Visual feedback during drag
-                        ui.placeholder.addClass('ui-sortable-placeholder-active');
-                    }
-                });
+        // Media modal scoped to a single attachment, for editing its details.
+        openEditFrame: function (attachmentId) {
+            var self = this;
+
+            this.editFrames = this.editFrames || {};
+
+            if (this.editFrames[attachmentId]) {
+                this.editFrames[attachmentId].open();
+                return;
             }
+
+            var model = wp.media.attachment(attachmentId);
+
+            var frame = wp.media({
+                title: this.editMediaTitle,
+                // Restrict the library to this one file so the modal opens
+                // straight on its details instead of the whole collection.
+                library: { post__in: [attachmentId] },
+                button: { text: WP_Attachments_Vars.doneEditing || 'Done' },
+                multiple: false
+            });
+
+            frame.on('open', function () {
+                model.fetch();
+                frame.state().get('selection').add(model);
+            });
+
+            // Core writes each field as it changes, so mirror it back into the
+            // row as the user types rather than waiting for the modal to close.
+            model.on('change:title', function (m) {
+                self.updateRowTitle(attachmentId, m.get('title'));
+            });
+
+            frame.on('select close', function () {
+                self.updateRowTitle(attachmentId, model.get('title'));
+            });
+
+            this.editFrames[attachmentId] = frame;
+            frame.open();
+        },
+
+        // Keep the row in step with a title edited in the media modal.
+        updateRowTitle: function (attachmentId, title) {
+            if (typeof title !== 'string') {
+                return;
+            }
+
+            var $row = $('.wpa-attachment-item[data-attachmentid="' + attachmentId + '"]');
+            if (!$row.length) {
+                return;
+            }
+
+            var display = title.length ? title : (WP_Attachments_Vars.noTitle || '(no title)');
+
+            // .attr() alone is not enough: jQuery caches data attributes, and
+            // the preview handler reads them through .data().
+            $row.attr('data-title', title).data('title', title);
+            $row.find('.wpa-attachment-title a').text(display).attr('title', display);
+
+            var $trigger = $row.find('.wpa-preview-trigger');
+            if ($trigger.length) {
+                $trigger.attr('data-title', title).data('title', title);
+
+                var template = WP_Attachments_Vars.previewLabel || 'Preview %s';
+                $trigger.find('.screen-reader-text').text(template.replace('%s', display));
+            }
+        },
+
+        // Move one row up or down. Shared by the buttons and the arrow keys.
+        moveItem: function ($item, up, focusEl) {
+            var $sibling = up
+                ? $item.prev('.wpa-attachment-item')
+                : $item.next('.wpa-attachment-item');
+
+            if (!$sibling.length) {
+                return false;
+            }
+
+            if (up) {
+                $item.insertBefore($sibling);
+            } else {
+                $item.insertAfter($sibling);
+            }
+
+            this.refreshMoveButtons();
+
+            // Moving the node in the DOM drops focus in some browsers. If the
+            // control that was used just became disabled (the row reached an
+            // end), fall back to the grip so focus never lands on <body>.
+            if (focusEl) {
+                if (focusEl.disabled) {
+                    $item.find('.wpa-attachment-drag-handle').trigger('focus');
+                } else {
+                    focusEl.focus();
+                }
+            }
+
+            this.announcePosition($item);
+            this.handleReorder();
+
+            return true;
+        },
+
+        // Grey out the moves that would do nothing.
+        refreshMoveButtons: function () {
+            var $items = $('#wpa-attachment-list').find('.wpa-attachment-item');
+            var last = $items.length - 1;
+
+            $items.each(function (i) {
+                $(this).find('.wpa-move-up').prop('disabled', i === 0);
+                $(this).find('.wpa-move-down').prop('disabled', i === last);
+            });
+        },
+
+        // Tell screen readers where the row ended up.
+        announcePosition: function ($item) {
+            var $status = $('#wpa-reorder-status');
+            if (!$status.length) {
+                return;
+            }
+
+            var $all = $('#wpa-attachment-list').find('.wpa-attachment-item');
+            var position = $all.index($item) + 1;
+            var template = WP_Attachments_Vars.movedTo || 'Moved to position %1$s of %2$s';
+
+            $status.text(
+                template.replace('%1$s', position).replace('%2$s', $all.length)
+            );
+        },
+
+        initSortable: function() {
+            var self = this;
+
+            if (!this.$container.length) {
+                return;
+            }
+
+            // Already initialised: just let jQuery UI pick up new items.
+            // Re-running .sortable() would stack duplicate instances, and each
+            // one would fire its own reorder request.
+            if (this.$container.hasClass('ui-sortable')) {
+                this.$container.sortable('refresh');
+                return;
+            }
+
+            this.$container.sortable({
+                items: '.wpa-attachment-item',
+                handle: '.wpa-attachment-drag-handle',
+                cursor: 'move',
+                opacity: 0.7,
+                placeholder: 'wpa-attachment-item ui-sortable-placeholder',
+                forcePlaceholderSize: true,
+                tolerance: 'pointer',
+                containment: 'parent',
+                // jQuery UI's default cancel selector is
+                // "input,textarea,button,select,option". The drag handle is a
+                // <button> (so it is keyboard reachable), which that default
+                // silently refuses to drag. Drags can only start on `handle`
+                // anyway, so dropping "button" here is safe.
+                cancel: 'input, textarea, select, option',
+                start: function(e, ui) {
+                    ui.item.addClass('ui-sortable-helper');
+                    ui.placeholder.height(ui.item.height());
+                },
+                stop: function(e, ui) {
+                    ui.item.removeClass('ui-sortable-helper');
+                },
+                // 'update' fires once, and only when the order actually changed.
+                update: function() {
+                    self.refreshMoveButtons();
+                    self.handleReorder();
+                },
+                change: function(e, ui) {
+                    // Visual feedback during drag
+                    ui.placeholder.addClass('ui-sortable-placeholder-active');
+                }
+            });
         },
         
         initializeFilePreview: function() {
@@ -110,9 +322,9 @@ var WP_Attachments = (function($) {
             }
 
             this.mediaFrame = wp.media({
-                title: 'Add Media Attachments',
+                title: WP_Attachments_Vars.mediaFrameTitle || 'Add Media Attachments',
                 button: {
-                    text: 'Attach to Post'
+                    text: WP_Attachments_Vars.mediaFrameButton || 'Attach to Post'
                 },
                 multiple: true
             });
@@ -122,7 +334,7 @@ var WP_Attachments = (function($) {
                 var postId = parseInt(self.postID);
 
                 if (!postId) {
-                    alert('Please save the post first before adding attachments.');
+                    window.alert(WP_Attachments_Vars.saveFirst || 'Please save this content before adding attachments.');
                     return;
                 }
 
@@ -138,10 +350,14 @@ var WP_Attachments = (function($) {
                     if (currentParent > 0 && currentParent !== postId) {
                         var parentTitle = attributes.uploadedToTitle || (attributes.parentObj ? attributes.parentObj.post_title : 'another content');
                         
-                        proceed = confirm(
-                            'The file "' + attachmentTitle + '" is already attached to "' + parentTitle + '" (ID: ' + currentParent + ').\n' +
-                            'By attaching it here, it will be unattached from its original location.\n\n' +
-                            'Do you want to proceed?'
+                        var warning = WP_Attachments_Vars.reattachWarning ||
+                            'The file "%1$s" is already attached to "%2$s" (ID: %3$s).';
+
+                        proceed = window.confirm(
+                            warning
+                                .replace('%1$s', attachmentTitle)
+                                .replace('%2$s', parentTitle)
+                                .replace('%3$s', currentParent)
                         );
                     }
                     
@@ -168,15 +384,30 @@ var WP_Attachments = (function($) {
                 },
                 success: function(response) {
                     if (response.success && response.data && response.data.html) {
-                        // Remove "no attachments" message if present
+                        // Re-query: the editor may have re-rendered the metabox
+                        // since the last cache.
+                        self.$container = $('#wpa-attachment-list');
+                        if (!self.$container.length) {
+                            return;
+                        }
+
+                        // Remove "no attachments" placeholder if present
                         $('.wpa-no-attachments').remove();
+
                         // Append new attachment to the list
                         var $newItem = $(response.data.html);
                         self.$container.append($newItem.hide().fadeIn(400));
-                        // Re-cache elements and re-init sortable
+
+                        // Keep the counters in sync without a page reload
+                        if (response.data.stats) {
+                            $('#wpa-attachments-stats').html(response.data.stats);
+                        }
+
+                        // Re-cache elements and let sortable pick up the new row
                         self.cacheElements();
                         self.initSortable();
-                        // Trigger reorder to save new order
+                        self.refreshMoveButtons();
+                        // Persist the new order
                         self.handleReorder();
                     } else {
                         console.error('Failed to attach media:', response.data);
@@ -188,10 +419,13 @@ var WP_Attachments = (function($) {
             });
         },
         
-        previewFile: function(url, mimeType, title) {
+        previewFile: function(url, mimeType, title, trigger) {
             if (!url || !mimeType) return;
-            
-            this.$previewTitle.text(title || 'File Preview');
+
+            // Remember what opened the modal so focus can go back there.
+            this.lastTrigger = trigger || null;
+
+            this.$previewTitle.text(title || WP_Attachments_Vars.previewFallback || 'File Preview');
             this.$previewContent.empty();
             
             var $previewElement;
@@ -231,35 +465,96 @@ var WP_Attachments = (function($) {
                         $previewElement.html('<p>Unable to preview this text file. <a href="' + url + '" target="_blank">Download instead</a></p>');
                     });
             } else {
-                // For other file types, show download link
-                $previewElement = $('<div>').html(
-                    '<div class="file-preview-placeholder" style="text-align: center; padding: 40px;">' +
-                    '<div class="dashicons dashicons-media-default" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></div>' +
-                    '<h3>Preview not available</h3>' +
-                    '<p>This file type cannot be previewed directly.</p>' +
-                    '<a href="' + url + '" target="_blank" class="button button-primary">Download File</a>' +
-                    '</div>'
+                // For other file types, offer a download link.
+                // Built with jQuery rather than string concatenation so the URL
+                // can never break out of the attribute.
+                $previewElement = $('<div>').addClass('file-preview-placeholder')
+                    .css({ textAlign: 'center', padding: '40px 20px' });
+
+                $previewElement.append(
+                    $('<div>').addClass('dashicons dashicons-media-default')
+                        .css({ fontSize: '48px', width: '48px', height: '48px', color: '#c3c4c7' })
+                );
+                $previewElement.append(
+                    $('<h3>').text(WP_Attachments_Vars.previewUnavailable || 'Preview not available')
+                );
+                $previewElement.append(
+                    $('<a>').addClass('button button-primary')
+                        .attr({ href: url, target: '_blank', rel: 'noopener noreferrer' })
+                        .text(WP_Attachments_Vars.downloadFile || 'Download file')
                 );
             }
-            
+
             this.$previewContent.append($previewElement);
-            this.$previewModal.fadeIn(300);
+            this.openPreviewModal();
         },
-        
+
+        openPreviewModal: function() {
+            this.$previewModal.addClass('is-open').attr('aria-hidden', 'false');
+            $('body').addClass('wpa-modal-open');
+
+            var $close = this.$previewModal.find('.wpa-preview-close');
+            if ($close.length) {
+                $close.trigger('focus');
+            }
+        },
+
         closePreviewModal: function() {
-            this.$previewModal.fadeOut(300);
-            
-            // Clean up media elements to stop playback
+            if (!this.$previewModal || !this.$previewModal.hasClass('is-open')) {
+                return;
+            }
+
+            this.$previewModal.removeClass('is-open').attr('aria-hidden', 'true');
+            $('body').removeClass('wpa-modal-open');
+
+            // Stop playback, then drop the nodes so nothing keeps buffering.
             this.$previewContent.find('video, audio').each(function() {
                 if (this.pause) this.pause();
                 this.currentTime = 0;
             });
+            this.$previewContent.empty();
+
+            if (this.lastTrigger) {
+                $(this.lastTrigger).trigger('focus');
+                this.lastTrigger = null;
+            }
         },
-        
+
         handleKeyEvents: function(e) {
-            // Close preview modal on Escape key
-            if (e.keyCode === 27) { // Escape key
+            // Only act while the modal is actually open.
+            if (!this.$previewModal || !this.$previewModal.hasClass('is-open')) {
+                return;
+            }
+
+            if (e.key === 'Escape' || e.keyCode === 27) {
                 this.closePreviewModal();
+                return;
+            }
+
+            if (e.key === 'Tab' || e.keyCode === 9) {
+                this.trapFocus(e);
+            }
+        },
+
+        // Keep Tab inside the dialog while it is open.
+        trapFocus: function(e) {
+            var $focusable = this.$previewModal
+                .find('a[href], button:not([disabled]), video[controls], audio[controls], iframe, [tabindex]:not([tabindex="-1"])')
+                .filter(':visible');
+
+            if (!$focusable.length) {
+                return;
+            }
+
+            var first = $focusable.first()[0];
+            var last = $focusable.last()[0];
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
             }
         },
         

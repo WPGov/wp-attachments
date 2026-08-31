@@ -59,6 +59,11 @@ if ( ! class_exists( 'WPA_Download_Counter' ) ) {
          * Output custom CSS for the Downloads column in admin.
          */
         public function admin_column_css() {
+            $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+            if (!$screen || $screen->base !== 'upload') {
+                return;
+            }
+
             echo '<style>
                 .column-wpa-download { width: 110px; text-align: center; }
                 .wpa-download-count { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }

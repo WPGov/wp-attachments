@@ -1,4 +1,4 @@
-ul.post-attachments{list-style:none;margin:0;}
+ul.post-attachments{list-style:none;margin:0;padding:0;}
 li.post-attachment{background:url(document.png) 0 4px no-repeat;padding-left:24px;}
 
 /* Standard formats */
@@ -14,3 +14,13 @@ li.post-attachment{background:url(document.png) 0 4px no-repeat;padding-left:24p
 /* Open formats */
 .post-attachment.mime-application-vnd-oasis-opendocument-spreadsheet{background-image:url(document-ods.png);}
 .post-attachment.mime-application-vnd-oasis-opendocument-text{background-image:url(document-odt.png);}
+
+/* Layout + sort links (added for accessibility and theme-proofing) */
+.wpa-attachments-block{width:100%;margin:10px 0;}
+.wpa-attachments-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;}
+.wpa-attachments-title{margin:0;}
+.wpa-orderby{font-size:.85em;}
+.wpa-orderby-label{margin-right:.35em;opacity:.75;}
+.wpa-orderby-link{margin-left:.6em;}
+.wpa-orderby-link.is-current{font-weight:700;text-decoration:none;}
+.post-attachment .wpa-attachment-date{float:right;margin-left:1em;}

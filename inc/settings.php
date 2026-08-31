@@ -16,7 +16,6 @@ function wpatt_plugin_options()
         update_option('wpatt_option_date_localization', sanitize_text_field($_POST["wpatt_option_date_localization_n"] ?? ''));
         
         update_option('wpatt_show_orderby', !empty($_POST['wpatt_show_orderby_n']) ? '1' : '0');
-        update_option('wpatt_option_showdate', !empty($_POST['wpatt_option_showdate_n']) ? '1' : '0');
         update_option('wpatt_option_includeimages', !empty($_POST['wpatt_option_includeimages_n']) ? '1' : '0');
         update_option('wpatt_option_targetblank', !empty($_POST['wpatt_option_targetblank_n']) ? '1' : '0');
         update_option('wpatt_option_restrictload', !empty($_POST['wpatt_option_restrictload_n']) ? '1' : '0');
@@ -117,11 +116,7 @@ function wpatt_plugin_options()
                     <div class="wpatt-checkbox-group">
                         <label>
                             <input type="checkbox" name="wpatt_show_orderby_n" ' . (get_option('wpatt_show_orderby') == '1' ? 'checked' : '') . '/>
-                            ' . esc_html__('Show orderby dropdown (Date, Title, File size)', 'wp-attachments') . '
-                        </label>
-                        <label>
-                            <input type="checkbox" name="wpatt_option_showdate_n" ' . (get_option('wpatt_option_showdate') == '1' ? 'checked' : '') . '/>
-                            ' . esc_html__('Show file date in the list', 'wp-attachments') . '
+                            ' . esc_html__('Show the sort links above the list (Date, Name)', 'wp-attachments') . '
                         </label>
                         <label>
                             <input type="checkbox" name="wpatt_option_includeimages_n" ' . (get_option('wpatt_option_includeimages') == '1' ? 'checked' : '') . '/>
@@ -144,7 +139,7 @@ function wpatt_plugin_options()
                 <td>
                     <input type="text" name="wpatt_option_date_localization_n" value="' . esc_attr(get_option('wpatt_option_date_localization')) . '" />
                     <span class="wpatt-desc">' . sprintf(
-                        esc_html__('Date format following PHP date standards. Default: %s', 'wp-attachments'),
+                        esc_html__('Format for the %%DATE%% tag, following PHP date standards. Leave empty to use the WordPress setting. Default: %s', 'wp-attachments'),
                         '<code>d.m.Y</code>'
                     ) . '</span>
                 </td>
@@ -240,11 +235,11 @@ function wpatt_plugin_options()
                 ],
                 1 => [
                     'label' => 'List with date',
-                    'code' => '<a href="%URL%">%TITLE%</a> <small>(%SIZE%)</small> <div style="float:right;">%DATE%</div>',
+                    'code' => '<a href="%URL%">%TITLE%</a> <small>(%SIZE%)</small> <span class="wpa-attachment-date">%DATE%</span>',
                 ],
                 2 => [
                     'label' => 'Detailed List',
-                    'code' => '<a href="%URL%">%TITLE%</a> <small>&bull; %SIZE% &bull; %DOWNLOADS% clicks</small> <div style="float:right;">%DATE%</div><br><small>%CAPTION%</small>',
+                    'code' => '<a href="%URL%">%TITLE%</a> <small>&bull; %SIZE% &bull; %DOWNLOADS% clicks</small> <span class="wpa-attachment-date">%DATE%</span><br><small>%CAPTION%</small>',
                 ],
             ];
             foreach ($templates as $val => $tpl) {

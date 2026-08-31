@@ -1,31 +1,36 @@
 === WP Attachments ===
-Contributors: Milmor  
-Tags: attachments, media, file, list, classicpress  
-Donate link: https://www.paypal.me/milesimarco  
+Contributors: Milmor
+Tags: attachments, media, file, list, classicpress
+Donate link: https://www.paypal.me/milesimarco
 Requires at least: 4.4
-Tested up to: 6.9
-Version: 5.3.4
-Stable tag: 5.3.4
-License: GPLv2 or later  
-License URI: http://www.gnu.org/licenses/gpl-2.0.html  
+Requires PHP: 7.4
+Tested up to: 7.1
+Version: 6.0.1
+Stable tag: 6.0.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A powerful solution to manage and display your WordPress media attachments in posts and pages.
+Attach files to any post or page and let WP Attachments list them for you, with icons, file sizes and a download counter.
 
 == Description ==
 
-WP Attachments enhances the download experience and file management in WordPress. It automatically displays attachments in your posts and pages, so you don’t need to manually insert download links.  
-Easily attach, unattach, or reattach files directly from the media library.
+WP Attachments turns the files you upload to a post into a clean, automatic download list. Attach a file while editing, and it shows up under your content — no manual links, no shortcodes to remember.
 
-**Key Features:**
-- 🤖 Automatically displays attachments after post content
-- ℹ️ Backend metabox for managing attachments
-- 🔃 Quick Attach, Unattach, and Reattach actions in the Media Library
-- 🔢 Download counter with anti-spam and logged-in user filtering
-- 🧑‍💻 Developer hooks and filters for customization
-- 🛍️ WooCommerce compatible
-- 🎨 Five icon packs to choose from
-- 📜 Supports posts, pages, and custom post types
-- 🎢 Customizable themes (title, date, size, caption, and more)
+It also fills the gaps in the WordPress Media Library, letting you attach, unattach and reattach files without leaving the screen you are on.
+
+**Key features**
+
+- 🤖 Lists attachments automatically after the post content
+- ℹ️ Metabox for managing, previewing, renaming and reordering the files of a post
+- 🔃 Attach, Unattach and Reattach actions in the Media Library
+- 🔢 A Files column in the post and page lists: see the count, click through to the files
+- 🔢 Download counter that ignores crawlers, prefetches and repeat clicks
+- ♿ Reordering works with the mouse, the keyboard and screen readers
+- 🧑‍💻 Filters for developers who want to change the markup
+- 🛍️ WooCommerce compatible, including High-Performance Order Storage
+- 🎨 Four icon packs for the frontend list
+- 📜 Works with posts, pages and custom post types
+- 🎢 Templates you can customise: title, date, size, caption, downloads and more
 
 [Video Overview](https://www.youtube.com/watch?v=J7gf0hxl_z8)
 
@@ -39,45 +44,73 @@ Easily attach, unattach, or reattach files directly from the media library.
 == Installation ==
 
 1. Install via the WordPress.org plugin directory or upload the files to your server.
-2. Activate the plugin. To customize, go to **Settings → WP Attachments**.
-3. While editing a post, page, or custom post type, you’ll see a new metabox for managing attachments. Additional features are available in the Media Library: Attach, Reattach.
+2. Activate the plugin. To customise it, go to **Settings → WP Attachments**.
+3. While editing a post, page or custom post type you will find the **Media Attachments** metabox. Extra actions are available in the Media Library: Attach, Unattach and Reattach.
 
 == Frequently Asked Questions ==
 
-= How can I hide the attachment list for a specific page? =
-In the edit screen, use the plugin’s metabox to disable the automatic listing by checking **Disable** at the bottom right.
+= How do I hide the attachment list on a specific post or page? =
+Open the **Media Attachments** metabox while editing and switch off **Display attachments in frontend**, at the bottom left. The files stay attached, they are simply not listed on the site.
 
-= How can I avoid double listing? =
-You don’t need to insert file links manually. When you upload a file, it’s automatically assigned to the content and displayed by WP Attachments. Just close the media popup after uploading.
+You can also set the default for a whole post type under **Settings → WP Attachments → Post Type Permissions**.
 
-= How can I reorder files? =
-Drag and drop attachments in the WP Attachments metabox or Media Popup while editing.
+= How do I avoid the same file being listed twice? =
+Do not insert the link manually. A file uploaded from the editor is attached to the content automatically and listed by WP Attachments, so you can simply close the media popup after uploading.
 
-= Developer Filters =
-WP Attachments includes many filters for developers:
+= How do I reorder the files? =
+Three ways, all of which save straight away:
 
-- **wpatt_list_html** — Filter the entire list output (`$html`)
-- **wpatt_before_entry_html** — Filter single entry output before tag parsing (`$html`)
-- **wpatt_after_entry_html** — Filter single entry output after tag parsing (`$html`)
-- **wpatt_accepted_formats** — Filter which files are shown (`$mime`)
+* drag a row by the grip on its left;
+* use the **Move up** / **Move down** buttons on each row;
+* focus the grip and press the up or down arrow key.
 
-**Examples:**
+= How do I see which files belong to a post? =
+The **Files** column in the post and page lists shows how many files each one has. Click the number to open the Media Library filtered to just those files.
 
-```php
+= Can I change the date format of the list? =
+Yes, under **Settings → WP Attachments → Date Format**. It accepts the standard PHP date characters and applies to the `%DATE%` tag. Leave it empty to follow **Settings → General → Date Format**.
+
+= Does the download counter count everything? =
+No. It skips browser prefetch requests and known crawlers, and it ignores repeat hits from the same visitor on the same file for a few minutes. Those requests still receive the file, they just do not move the number.
+
+= Which files can be previewed in the metabox? =
+Images, video, audio, PDF and plain text open in a preview dialog. Any other format shows its icon and a download link.
+
+= Developer filters =
+
+- **wpatt_list_html** — the whole list markup (`$html`)
+- **wpatt_before_entry_html** — a single entry, before the tags are replaced (`$html`)
+- **wpatt_after_entry_html** — a single entry, after the tags are replaced (`$html`)
+- **wpatt_accepted_formats** — return a falsy value to hide a file (`$mime`)
+- **wpatt_download_throttle** — how long the same visitor is ignored for the same file (`$seconds`, `$attachment_id`)
+- **wpatt_count_download_request** — whether the current request may increment a counter (`$countable`)
+
+**Examples**
+
+`
 function my_custom_function( $html ) {
-    // Alter final HTML
+    // Alter the final HTML
     return $new_html;
 }
 add_filter( 'wpatt_list_html', 'my_custom_function' );
-```
+`
 
-```php
-function my_custom_function( $mime ) {
+`
+function my_pdf_only( $mime ) {
     // Only show PDFs in the list
-    return $mime == 'application/pdf';
+    return $mime === 'application/pdf';
 }
-add_filter( 'wpatt_accepted_formats', 'my_custom_function' );
-```
+add_filter( 'wpatt_accepted_formats', 'my_pdf_only' );
+`
+
+`
+// Count each visitor at most once per hour
+add_filter( 'wpatt_download_throttle', function () {
+    return HOUR_IN_SECONDS;
+} );
+`
+
+There is also `wpatt_get_attachments_html( $parent_id )`, which returns the list for any parent ID without going through the `the_content` filter.
 
 == Screenshots ==
 
@@ -87,8 +120,23 @@ add_filter( 'wpatt_accepted_formats', 'my_custom_function' );
 4. Backend metabox
 5. Attach, unattach, and reattach files in the Media screen
 
+== Upgrade Notice ==
+
+= 6.0 =
+Requires PHP 7.4. If you use a custom template, note that %DATE% now renders as a span instead of a floated div.
 
 == Changelog ==
+
+= 6.0 2026-08-31 =
+
+* **New:** a Files column in the post, page and custom post type lists shows how many files are attached to each one, and links straight to them in the Media Library.
+* **New:** the Edit action in the metabox now opens media modal in place, so titles, captions and alt text can be changed without leaving the editor.
+* **Security:** fixed a cross-site request forgery issue.
+* **Accessibility:** files can now be reordered with the keyboard, and the frontend sort control works without JavaScript.
+* The download counter now ignores crawlers and browser prefetch requests.
+* Fixed wrong file sizes, the Date Format setting that had no effect, and the first attachment not showing up until the page was reloaded.
+* New file type icons, and admin assets now load only on the screens that use them.
+* WooCommerce: declared compatibility with High-Performance Order Storage.
 
 = 5.3.4 2026-03-14 =
 * Minor fixes and improvements.

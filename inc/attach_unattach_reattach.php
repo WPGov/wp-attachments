@@ -59,6 +59,12 @@ function wpa_media_custom_columns($column_name, $id) {
 
 // Add custom CSS and hooks
 function wpa_custom_admin_css() {
+    // Media Library only: this used to print on every admin screen.
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$screen || $screen->base !== 'upload') {
+        return;
+    }
+
     echo '<style>
         #wpattachments_parent { width: 15%; }
         .wpa-parent-cell { min-width: 180px; }
@@ -90,20 +96,22 @@ function wpa_unattach_do_it() {
 
     if (!empty($_REQUEST['id'])) {
         $id = absint($_REQUEST['id']);
+
+        $nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field(wp_unslash($_REQUEST['_wpnonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'wpa_unattach_' . $id)) {
+            wp_die(esc_html__('Security check failed.', 'wp-attachments'));
+        }
+
         if (!current_user_can('edit_post', $id)) {
-            wp_die(__('You do not have permission.', 'wp-attachments'));
+            wp_die(esc_html__('You do not have permission.', 'wp-attachments'));
         }
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'wpa_unattach_' . $id)) {
-            // Fallback for requests from metabox that don't have nonce yet
-            if (!isset($_GET['noheader'])) {
-                wp_die(__('Security check failed.', 'wp-attachments'));
-            }
-        }
+
         $wpdb->update($wpdb->posts, array('post_parent' => 0), array('ID' => $id, 'post_type' => 'attachment'));
+        clean_post_cache($id);
     }
 
     if (!empty($_REQUEST['referer'])) {
-        wp_safe_redirect($_REQUEST['referer']);
+        wp_safe_redirect(esc_url_raw(wp_unslash($_REQUEST['referer'])));
     } elseif (wp_get_referer()) {
         wp_safe_redirect(wp_get_referer());
     } else {
