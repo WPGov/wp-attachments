@@ -3,6 +3,7 @@
 Attach files to any post or page and let WordPress list them for you, with icons, file sizes and a download counter.
 
 [![WordPress plugin](https://img.shields.io/wordpress/plugin/v/wp-attachments.svg)](https://wordpress.org/plugins/wp-attachments/)
+[![Active Installs](https://img.shields.io/wordpress/plugin/installs/wp-attachments.svg)](https://wordpress.org/plugins/wp-attachments/)
 [![Downloads](https://img.shields.io/wordpress/plugin/dt/wp-attachments.svg)](https://wordpress.org/plugins/wp-attachments/)
 
 Upload a file while editing a post and it shows up under your content — no manual links, no shortcodes.
@@ -27,15 +28,6 @@ Upload a file while editing a post and it shows up under your content — no man
 
 From the WordPress admin: **Plugins → Add New → search "WP Attachments"**.
 
-From this repository:
-
-```bash
-cd wp-content/plugins
-git clone https://github.com/WPGov/wp-attachments.git
-```
-
-No build step — plain PHP, CSS and JavaScript.
-
 ## Contributing
 
 Issues and pull requests are welcome. Please target the `master` branch and keep changes focused.
@@ -43,5 +35,5 @@ Issues and pull requests are welcome. Please target the `master` branch and keep
 ## Links
 
 - [Plugin page on WordPress.org](https://wordpress.org/plugins/wp-attachments/)
-- [Changelog](readme.txt) — kept in `readme.txt`, the file WordPress.org reads
+- [Changelog](readme.txt)
 - Part of [WPGov.it](http://www.wpgov.it), open source for Italian public sector websites
