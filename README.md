@@ -1,4 +1,4 @@
-# WP Attachments
+# WP Attachments – Smarter File Management & Download Lists
 
 Attach files to any post or page and let WordPress list them for you, with icons, file sizes and a download counter.
 

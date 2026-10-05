@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: WP Attachments
+Plugin Name: WP Attachments – Smarter File Management & Download Lists
 Plugin URI:   https://wordpress.org/plugins/wp-attachments
 Description: Powerful solution to manage and show your WordPress media in posts and pages
 Author: Marco Milesi

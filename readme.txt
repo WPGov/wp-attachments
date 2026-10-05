@@ -1,4 +1,4 @@
-=== WP Attachments ===
+=== WP Attachments – Smarter File Management & Download Lists ===
 Contributors: Milmor
 Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco
