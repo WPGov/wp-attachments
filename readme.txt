@@ -5,8 +5,8 @@ Donate link: https://www.paypal.me/milesimarco
 Requires at least: 4.4
 Requires PHP: 7.4
 Tested up to: 7.2
-Version: 6.0.3
-Stable tag: 6.0.3
+Version: 6.1
+Stable tag: 6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,14 +23,14 @@ It also fills the gaps in the WordPress Media Library, letting you attach, unatt
 - 🤖 Lists attachments automatically after the post content
 - ℹ️ Metabox for managing, previewing, renaming and reordering the files of a post
 - 🔃 Attach, Unattach and Reattach actions in the Media Library
-- 🔢 A Files column in the post and page lists: see the count, click through to the files
+- 🔢 A Files column in the post and page lists: count, visibility and a filter
 - 🔢 Download counter that ignores crawlers, prefetches and repeat clicks
 - ♿ Reordering works with the mouse, the keyboard and screen readers
 - 🧑‍💻 Filters for developers who want to change the markup
 - 🛍️ WooCommerce compatible, including High-Performance Order Storage
-- 🎨 Four icon packs for the frontend list
+- 🎨 Modern SVG icons and a Modern Card layout, plus the classic icon packs
 - 📜 Works with posts, pages and custom post types
-- 🎢 Templates you can customise: title, date, size, caption, downloads and more
+- 🎢 Templates with live previews, ready to customise: title, date, size, caption, downloads and more
 
 [Video Overview](https://www.youtube.com/watch?v=J7gf0hxl_z8)
 
@@ -52,7 +52,7 @@ It also fills the gaps in the WordPress Media Library, letting you attach, unatt
 = How do I hide the attachment list on a specific post or page? =
 Open the **Media Attachments** metabox while editing and switch off **Display attachments in frontend**, at the bottom left. The files stay attached, they are simply not listed on the site.
 
-You can also set the default for a whole post type under **Settings → WP Attachments → Post Type Permissions**.
+To hide the list for a whole post type, untick **Enable Frontend** under **Settings → WP Attachments → Post Type Permissions**.
 
 = How do I avoid the same file being listed twice? =
 Do not insert the link manually. A file uploaded from the editor is attached to the content automatically and listed by WP Attachments, so you can simply close the media popup after uploading.
@@ -65,7 +65,7 @@ Three ways, all of which save straight away:
 * focus the grip and press the up or down arrow key.
 
 = How do I see which files belong to a post? =
-The **Files** column in the post and page lists shows how many files each one has. Click the number to open the Media Library filtered to just those files.
+The **Files** column in the post and page lists shows how many files each one has, and an eye icon tells whether they are shown on the site. Click the number to open the Media Library filtered to just those files. The **Files** filter above the list finds posts with or without files, or with the list hidden.
 
 = Can I change the date format of the list? =
 Yes, under **Settings → WP Attachments → Date Format**. It accepts the standard PHP date characters and applies to the `%DATE%` tag. Leave it empty to follow **Settings → General → Date Format**.
@@ -84,6 +84,8 @@ Images, video, audio, PDF and plain text open in a preview dialog. Any other for
 - **wpatt_accepted_formats** — return a falsy value to hide a file (`$mime`)
 - **wpatt_download_throttle** — how long the same visitor is ignored for the same file (`$seconds`, `$attachment_id`)
 - **wpatt_count_download_request** — whether the current request may increment a counter (`$countable`)
+- **wpatt_can_download** — whether the current visitor may follow a download link (`$allowed`, `$attachment_id`)
+- **wpatt_should_render** — whether the list is appended to this content (`$render`, `$post`)
 
 **Examples**
 
@@ -114,13 +116,32 @@ There is also `wpatt_get_attachments_html( $parent_id )`, which returns the list
 
 == Screenshots ==
 
-1. The attachment list, built automatically from the files attached to the post
-2. General settings: list header, display options, download tracker and per post type permissions
-3. The same list in context, on a page of a demo site
-4. The Media Attachments metabox: manage, preview and reorder files without leaving the editor
-5. Attach, Unattach and Re-Attach files straight from the Media Library
+1. The Modern Card template on a post, with file type icons, size and date
+2. The Media Attachments metabox: manage, preview, reorder, unattach and delete files without leaving the editor
+3. Appearance settings: icon pack, icon colour and template options, each with a live preview
+4. The Files column in the post list: number of files, whether they are shown on the site, and a filter
+5. General settings: list header, display options, download counter and post type permissions
+6. Attach, Unattach and Re-Attach files straight from the Media Library
 
 == Changelog ==
+
+= 6.1 2026-10-05 =
+
+* **New:** Modern SVG icon pack, coloured by file type, by the theme text colour or by a custom colour.
+* **New:** Modern Card template, with options for the details shown, the layout and the card width.
+* **New:** template previews in the settings, and a button to start a custom template from any template.
+* **New:** the Files column shows whether a post displays its files, and a Files filter is added to the post lists.
+* **New:** Enable Frontend setting per post type, replacing Display Default. Enable Metabox no longer hides the frontend list.
+* **New:** heading level setting for the list title, and `%EXT%`, `%MIME%` and `%ICON%` template tags.
+* New installs start with Modern SVG and Modern Card. Existing sites keep their settings.
+* Unattach and Delete in the metabox no longer reload the page.
+* **Fix:** files deleted from the metabox were left on the server.
+* **Fix:** download links revealed files attached to private or password protected content.
+* **Fix:** download counter links failed with media on a CDN; file size showed "ERROR" for offloaded media.
+* **Fix:** an empty list header or date format was reset on save.
+* **Fix:** the list no longer appears in feeds, REST responses, automatic excerpts, or under other posts shown on a single post page.
+* **Fix:** the Matrilineare icon pack was missing from the settings.
+* Frontend styles no longer load in the admin.
 
 = 6.0.3 2026-08-31 =
 

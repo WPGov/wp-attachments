@@ -1,0 +1,14 @@
+ul.post-attachments{list-style:none;margin:0;padding:0;}
+li.post-attachment{padding:0;}
+
+/* Icons are inline SVG from the markup: see styles/common.css */
+
+/* Layout + sort links (added for accessibility and theme-proofing) */
+.wpa-attachments-block{width:100%;margin:10px 0;}
+.wpa-attachments-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;}
+.wpa-attachments-title{margin:0;}
+.wpa-orderby{font-size:.85em;}
+.wpa-orderby-label{margin-right:.35em;opacity:.75;}
+.wpa-orderby-link{margin-left:.6em;}
+.wpa-orderby-link.is-current{font-weight:700;text-decoration:none;}
+.post-attachment .wpa-attachment-date{float:right;margin-left:1em;}

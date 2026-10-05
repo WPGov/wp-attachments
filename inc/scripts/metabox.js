@@ -113,14 +113,76 @@ var WP_Attachments = (function($) {
             // Keyboard events for modals
             $(document).on('keydown', this.handleKeyEvents.bind(this));
             
-            // Unattach and delete confirmations
+            // Row unattach / delete: done in place, so unsaved edits to the
+            // post survive. The href stays as the no-JS fallback.
             $(document).on('click', '.wpa-unattach-action, .wpa-delete-action', function(e) {
+                // Modified clicks open the link as before.
+                if (e.which > 1 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                    return;
+                }
+
                 var isDelete = $(this).hasClass('wpa-delete-action');
-                var message = isDelete ? self.confirmDeleteText : self.youSureText;
-                    
-                if (!confirm(message)) {
-                    e.preventDefault();
-                    return false;
+                e.preventDefault();
+
+                if (!window.confirm(isDelete ? self.confirmDeleteText : self.youSureText)) {
+                    return;
+                }
+
+                var id = parseInt($(this).closest('.wpa-attachment-item').data('attachmentid'), 10);
+                if (id) {
+                    self.runAction(isDelete ? 'delete' : 'unattach', id);
+                }
+            });
+        },
+
+        // Unattach or delete one file through AJAX, then drop its row.
+        runAction: function(action, id) {
+            var self = this;
+            var $row = $('.wpa-attachment-item[data-attachmentid="' + id + '"]');
+
+            $row.addClass('is-busy');
+
+            $.ajax({
+                url: this.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: action === 'delete' ? 'wpa_delete_media' : 'wpa_unattach_media',
+                    attachment_id: id,
+                    post_id: this.postID,
+                    nonce: this.nonce
+                },
+                success: function(response) {
+                    if (!response.success || !response.data) {
+                        $row.removeClass('is-busy');
+                        window.alert(WP_Attachments_Vars.actionFailed || 'The file could not be changed.');
+                        return;
+                    }
+
+                    var data = response.data;
+
+                    $row.remove();
+
+                    if (data.stats) {
+                        $('#wpa-attachments-stats').html(data.stats);
+                    }
+                    if (data.empty && !$('#wpa-attachment-list .wpa-attachment-item').length) {
+                        $('#wpa-attachment-list').html(data.empty);
+                    }
+
+                    self.cacheElements();
+                    self.refreshMoveButtons();
+
+                    $('#wpa-reorder-status').text(action === 'delete'
+                        ? (WP_Attachments_Vars.fileDeleted || 'File deleted.')
+                        : (WP_Attachments_Vars.fileUnattached || 'File unattached.'));
+                },
+                error: function(xhr) {
+                    $row.removeClass('is-busy');
+                    // A JSON error is a refusal (permissions, file no longer
+                    // attached); anything else is a network or server problem.
+                    window.alert(xhr.responseJSON
+                        ? (WP_Attachments_Vars.actionFailed || 'The file could not be changed.')
+                        : (WP_Attachments_Vars.requestFailed || 'The request failed. Please try again.'));
                 }
             });
         },
@@ -587,22 +649,6 @@ var WP_Attachments = (function($) {
                 error: function(xhr, status, error) {
                     console.error('AJAX Error during reorder:', error);
                 }
-            });
-        },
-        
-        // Utility method to refresh attachment list
-        refreshAttachmentList: function() {
-            location.reload();
-        },
-        
-        // Add smooth animations for better UX
-        addAttachmentWithAnimation: function($attachment) {
-            $attachment.hide().appendTo(this.$container).fadeIn(400);
-        },
-        
-        removeAttachmentWithAnimation: function($attachment) {
-            $attachment.fadeOut(400, function() {
-                $(this).remove();
             });
         }
     };

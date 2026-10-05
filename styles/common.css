@@ -1,0 +1,35 @@
+/* Shared by every icon pack: Modern icons and the Card template. Sizes in em so they follow the theme font. */
+.wpa-icon{display:inline-block;width:1.15em;height:1.15em;margin-right:.35em;vertical-align:-.2em;flex-shrink:0;}
+
+/* Colour: .wpa-icons-color = one per file type, .wpa-icons-custom = the colour in --wpa-custom, neither = the text colour. */
+.wpa-icons-color .wpa-type-pdf{--wpa-c:#c9282a;}
+.wpa-icons-color .wpa-type-doc{--wpa-c:#1c5f96;}
+.wpa-icons-color .wpa-type-sheet{--wpa-c:#0a7040;}
+.wpa-icons-color .wpa-type-slides{--wpa-c:#a35a00;}
+.wpa-icons-color .wpa-type-archive{--wpa-c:#7a6100;}
+.wpa-icons-color .wpa-type-audio{--wpa-c:#6d47a1;}
+.wpa-icons-color .wpa-type-video{--wpa-c:#2f45c5;}
+.wpa-icons-color .wpa-type-image{--wpa-c:#0a6f6a;}
+.wpa-icons-color .wpa-icon{color:var(--wpa-c,currentColor);}
+.wpa-icons-custom .wpa-icon{color:var(--wpa-custom,currentColor);}
+
+/* Card template. ul.wpa-cards li beats the icon packs' li.post-attachment background. */
+ul.post-attachments.wpa-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(14em,1fr));gap:.6em;list-style:none;margin:0;padding:0;}
+ul.wpa-cards li.post-attachment{display:flex;align-items:center;gap:.7em;min-width:0;margin:0;padding:.6em .75em;background:none;border:1px solid rgba(128,128,128,.3);border-radius:6px;}
+.wpa-card-icon{display:flex;flex-shrink:0;align-items:center;justify-content:center;width:2.4em;height:2.4em;border-radius:5px;background:rgba(128,128,128,.12);}
+.wpa-icons-color .wpa-card-icon{background:color-mix(in srgb,var(--wpa-c,currentColor) 12%,transparent);}
+.wpa-icons-custom .wpa-card-icon{background:color-mix(in srgb,var(--wpa-custom,currentColor) 12%,transparent);}
+.wpa-card-icon .wpa-icon{width:1.5em;height:1.5em;margin:0;vertical-align:0;}
+.wpa-card-body{display:flex;flex-direction:column;min-width:0;line-height:1.35;}
+/* Up to two lines, then cut: a single line hid too much of longer titles. */
+.wpa-card-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:anywhere;font-weight:600;}
+.wpa-card-meta{display:flex;flex-wrap:wrap;font-size:.8em;opacity:.75;}
+ul.wpa-cards.wpa-cards--compact{grid-template-columns:repeat(auto-fill,minmax(11em,1fr));}
+ul.wpa-cards.wpa-cards--wide{grid-template-columns:repeat(auto-fill,minmax(20em,1fr));}
+ul.wpa-cards.wpa-cards--rows{grid-template-columns:minmax(0,1fr);}
+/* Details: hide the empty ones, separate only those actually shown. */
+.wpa-card-meta>span:empty,.wpa-card-caption:empty{display:none;}
+.wpa-card-meta>span{white-space:nowrap;} /* a detail wraps as a whole, never mid-date */
+/* Separator after a detail followed by another one: on a wrapped line it ends the line above. */
+.wpa-card-meta>span:not(:empty):has(~span:not(:empty))::after{content:"\00b7";margin:0 .35em;}
+.wpa-card-caption{font-size:.8em;}

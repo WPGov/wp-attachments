@@ -4,7 +4,8 @@ class WP_Attachments
 {
     private $actions = array(
         'add_meta_boxes', 'admin_enqueue_scripts',
-        'wp_ajax_wpa_realign', 'wp_ajax_wpa_attach_media' // renamed from ij_
+        'wp_ajax_wpa_realign', 'wp_ajax_wpa_attach_media', // renamed from ij_
+        'wp_ajax_wpa_unattach_media', 'wp_ajax_wpa_delete_media'
     );
 
     private static $instance;
@@ -85,7 +86,7 @@ class WP_Attachments
             'wp-attachments',
             plugin_dir_url(__FILE__) . 'scripts/metabox.js',
             array('jquery-ui-sortable'),
-            '6.0',
+            WPATT_VERSION,
             true
         );
 
@@ -109,6 +110,10 @@ class WP_Attachments
             'previewFallback'     => __('File Preview', 'wp-attachments'),
             'previewUnavailable'  => __('Preview not available for this file type.', 'wp-attachments'),
             'downloadFile'        => __('Download file', 'wp-attachments'),
+            'fileUnattached'      => __('File unattached.', 'wp-attachments'),
+            'fileDeleted'         => __('File deleted.', 'wp-attachments'),
+            'actionFailed'        => __('The file could not be changed.', 'wp-attachments'),
+            'requestFailed'       => __('The request failed. Please try again.', 'wp-attachments'),
             'postID'              => get_the_ID(), // Use get_the_ID() instead of $_GET
             'ajaxurl'             => admin_url('admin-ajax.php'),
             'nonce'               => wp_create_nonce('wpa-attachments-nonce')
@@ -116,7 +121,7 @@ class WP_Attachments
 
         // Inline-only stylesheet: registering a handle keeps the CSS inside the
         // normal dependency pipeline instead of echoing it mid-request.
-        wp_register_style('wpa-metabox', false, array(), '6.0');
+        wp_register_style('wpa-metabox', false, array(), WPATT_VERSION);
         wp_enqueue_style('wpa-metabox');
         wp_add_inline_style('wpa-metabox', $this->getStyles());
     }
@@ -191,7 +196,11 @@ class WP_Attachments
     background: var(--wpa-surface);
     border: 1px solid var(--wpa-border);
     border-radius: var(--wpa-radius);
-    transition: border-color .15s ease, box-shadow .15s ease;
+    transition: border-color .15s ease, box-shadow .15s ease, opacity .2s ease;
+}
+.wpa-attachments-wrapper .wpa-attachment-item.is-busy {
+    opacity: .5;
+    pointer-events: none;
 }
 .wpa-attachments-wrapper .wpa-attachment-item:hover {
     border-color: var(--wpa-border-strong);
@@ -618,122 +627,6 @@ CSS;
     }
 
     /**
-     * Reduce a MIME type to one of the icon families below.
-     */
-    private function getFileType($mime_type)
-    {
-        $mime_type = strtolower((string) $mime_type);
-
-        // Checked in order: the first prefix that matches wins, so the more
-        // specific entries (text/csv) come before the broad ones (text/).
-        $prefixes = array(
-            'image/'    => 'image',
-            'video/'    => 'video',
-            'audio/'    => 'audio',
-            'text/csv'  => 'sheet',
-            'text/html' => 'code',
-            'text/'     => 'text',
-        );
-        foreach ($prefixes as $prefix => $type) {
-            if (strpos($mime_type, $prefix) === 0) {
-                return $type;
-            }
-        }
-
-        $needles = array(
-            'pdf'               => 'pdf',
-            'wordprocessing'    => 'doc',
-            'msword'            => 'doc',
-            'opendocument.text' => 'doc',
-            'rtf'               => 'doc',
-            'spreadsheet'       => 'sheet',
-            'ms-excel'          => 'sheet',
-            'presentation'      => 'slides',
-            'ms-powerpoint'     => 'slides',
-            'zip'               => 'archive',
-            'compressed'        => 'archive',
-            'tar'               => 'archive',
-            'gzip'              => 'archive',
-            'json'              => 'code',
-            'xml'               => 'code',
-            'javascript'        => 'code',
-        );
-        foreach ($needles as $needle => $type) {
-            if (strpos($mime_type, $needle) !== false) {
-                return $type;
-            }
-        }
-
-        return 'default';
-    }
-
-    /**
-     * Inline SVG icon for a file family.
-     *
-     * Inline rather than a font or sprite: crisp at any pixel density, colour
-     * comes from the tile via currentColor, and it costs no extra request.
-     */
-    private function getFileIconSvg($type)
-    {
-        $open  = '<svg class="wpa-file-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">';
-        $close = '</svg>';
-
-        // Sheet of paper with a folded corner, shared by the document families.
-        $page = '<path d="M14 2.75H7A2.25 2.25 0 0 0 4.75 5v14A2.25 2.25 0 0 0 7 21.25h10A2.25 2.25 0 0 0 19.25 19V8L14 2.75Z" fill="currentColor" fill-opacity=".13"/>'
-              . '<path d="M14 2.75H7A2.25 2.25 0 0 0 4.75 5v14A2.25 2.25 0 0 0 7 21.25h10A2.25 2.25 0 0 0 19.25 19V8L14 2.75Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
-              . '<path d="M13.75 3v4.25H18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>';
-
-        // Rounded frame shared by the media families.
-        $frame = '<rect x="3.75" y="4.75" width="16.5" height="14.5" rx="2.25" fill="currentColor" fill-opacity=".13"/>'
-               . '<rect x="3.75" y="4.75" width="16.5" height="14.5" rx="2.25" stroke="currentColor" stroke-width="1.5"/>';
-
-        $glyphs = array(
-            'pdf' => $page
-                . '<path d="M8 12.5h8M8 15.5h8M8 18.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-
-            'doc' => $page
-                . '<path d="M8 12.5h8M8 15.5h8M8 18.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-
-            'text' => $page
-                . '<path d="M8 12.5h8M8 15.5h8M8 18.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-
-            'sheet' => $page
-                . '<rect x="7.25" y="12.25" width="9.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.5"/>'
-                . '<path d="M12 12.25v6.5M7.25 15.5h9.5" stroke="currentColor" stroke-width="1.5"/>',
-
-            'slides' => $page
-                . '<rect x="7.25" y="12.25" width="9.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.5"/>'
-                . '<path d="M9.5 16.5l2-2 1.75 1.75 1.25-1.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
-
-            'code' => $page
-                . '<path d="M10.25 12.75 7.75 15.5l2.5 2.75M13.75 12.75l2.5 2.75-2.5 2.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
-
-            'image' => $frame
-                . '<circle cx="8.75" cy="10" r="1.5" fill="currentColor"/>'
-                . '<path d="M4.75 17.5 9.5 12.75l3.25 3.25 2.25-1.75 4.25 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
-
-            'video' => $frame
-                . '<path d="M10.25 9.25v5.5l5-2.75-5-2.75Z" fill="currentColor"/>',
-
-            'audio' => '<path d="M9.5 16.5V6.75l8.75-1.75V14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
-                . '<ellipse cx="7.25" cy="16.75" rx="2.75" ry="2.25" fill="currentColor"/>'
-                . '<ellipse cx="16" cy="14.75" rx="2.75" ry="2.25" fill="currentColor"/>',
-
-            'archive' => '<path d="M4.75 7.75h14.5V19A2.25 2.25 0 0 1 17 21.25H7A2.25 2.25 0 0 1 4.75 19V7.75Z" fill="currentColor" fill-opacity=".13"/>'
-                . '<rect x="3.75" y="3.75" width="16.5" height="4" rx="1.25" stroke="currentColor" stroke-width="1.5"/>'
-                . '<path d="M5 7.75V19A2.25 2.25 0 0 0 7.25 21.25h9.5A2.25 2.25 0 0 0 19 19V7.75" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
-                . '<path d="M10.25 11.5h3.5M10.25 14.5h3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-
-            'default' => $page
-                . '<path d="M8 13.5h8M8 16.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-        );
-
-        $glyph = isset($glyphs[$type]) ? $glyphs[$type] : $glyphs['default'];
-
-        return $open . $glyph . $close;
-    }
-
-    /**
      * Row-action icons, drawn to stay legible at 18px.
      */
     private function getActionIcon($name)
@@ -816,7 +709,7 @@ CSS;
                     . '</span>';
             }
         } else {
-            $inner = $this->getFileIconSvg($this->getFileType($mime_type));
+            $inner = wpatt_get_file_icon_svg(wpatt_get_file_type($mime_type));
         }
 
         $previewable = $is_image
@@ -863,10 +756,10 @@ CSS;
 
         foreach ((array) $attachments as $attachment) {
             $count++;
-            $id   = is_object($attachment) ? $attachment->ID : (int) $attachment;
-            $path = get_attached_file($id);
-            if ($path && file_exists($path)) {
-                $size += filesize($path);
+            $id    = is_object($attachment) ? $attachment->ID : (int) $attachment;
+            $bytes = wpatt_get_attachment_filesize($id);
+            if (false !== $bytes) {
+                $size += $bytes;
             }
         }
 
@@ -933,17 +826,8 @@ CSS;
 
         $stats = $this->getStats($attachments->posts);
 
-        // Get default ON/OFF for this post type
-        $default_on = get_option('wpatt_enable_display_' . $post->post_type, '1');
-        $is_off = get_post_meta($post->ID, 'wpa_off', true);
-        // If meta not set, use default
-        if ( $is_off == 1 ) {
-            // Disabled by user
-        } else if (in_array($post->post_status, array('auto-draft', 'draft', 'new'))) {
-            $is_off = ($default_on === '1') ? '' : '1';
-        } else {
-            $is_off = ($default_on === '1') ? '' : '1';
-        }
+        $is_off      = !wpatt_is_display_enabled($post);
+        $frontend_on = wpatt_is_frontend_enabled($post->post_type);
         ?>
 
         <div class="wpa-attachments-wrapper">
@@ -975,10 +859,14 @@ CSS;
             <div id="wpa-reorder-status" class="screen-reader-text" role="status" aria-live="polite"></div>
 
             <div class="wpa-attachments-footer">
-                <div class="wpa-toggle-wrapper">
-                    <input type="checkbox" id="wpa_off_n" name="wpa_off" <?php checked(!$is_off); ?> />
-                    <label for="wpa_off_n"><?php esc_html_e('Display attachments in frontend', 'wp-attachments'); ?></label>
-                </div>
+                <?php if ($frontend_on) : ?>
+                    <div class="wpa-toggle-wrapper">
+                        <input type="checkbox" id="wpa_off_n" name="wpa_off" <?php checked(!$is_off); ?> />
+                        <label for="wpa_off_n"><?php esc_html_e('Display attachments in frontend', 'wp-attachments'); ?></label>
+                    </div>
+                <?php else : ?>
+                    <p class="description"><?php esc_html_e('The frontend list is disabled for this post type in the WP Attachments settings.', 'wp-attachments'); ?></p>
+                <?php endif; ?>
                 <?php if (current_user_can('upload_files')) : ?>
                     <div class="wpa-attachments-footer-buttons">
                         <?php // type="button": inside the edit form a bare <button> defaults to submit. ?>
@@ -1112,6 +1000,82 @@ CSS;
         ));
     }
 
+    // AJAX: unattach a file from the post being edited.
+    public function wp_ajax_wpa_unattach_media()
+    {
+        $this->handleRowAction('unattach');
+    }
+
+    // AJAX: permanently delete a file of the post being edited.
+    public function wp_ajax_wpa_delete_media()
+    {
+        $this->handleRowAction('delete');
+    }
+
+    /**
+     * Shared handler for the unattach and delete row actions.
+     *
+     * One file per request, on purpose. It must be attached to the given
+     * post and is checked on its own: a nonce plus the right to edit the
+     * post must not be enough to unattach or delete somebody else's file.
+     *
+     * @param string $action 'unattach' or 'delete'.
+     */
+    private function handleRowAction($action)
+    {
+        check_ajax_referer('wpa-attachments-nonce', 'nonce');
+
+        $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
+        if (!$post_id || !current_user_can('edit_post', $post_id)) {
+            wp_send_json_error(__('Permission denied', 'wp-attachments'), 403);
+        }
+
+        $id         = isset($_POST['attachment_id']) ? absint($_POST['attachment_id']) : 0;
+        $attachment = $id ? get_post($id) : null;
+
+        if (!$attachment || $attachment->post_type !== 'attachment' || (int) $attachment->post_parent !== $post_id) {
+            wp_send_json_error(__('The file could not be changed.', 'wp-attachments'), 400);
+        }
+
+        if ('delete' === $action) {
+            // wp_delete_attachment() also removes the files from disk.
+            $ok = current_user_can('delete_post', $id) && wp_delete_attachment($id, true);
+        } else {
+            $ok = current_user_can('edit_post', $id)
+                && !is_wp_error(wp_update_post(array('ID' => $id, 'post_parent' => 0), true));
+        }
+
+        if (!$ok) {
+            wp_send_json_error(__('The file could not be changed.', 'wp-attachments'), 403);
+        }
+
+        // Refreshed counters, and the empty state once nothing is left.
+        $remaining = get_posts(array(
+            'post_parent'    => $post_id,
+            'post_type'      => 'attachment',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ));
+
+        ob_start();
+        $this->renderStats($this->getStats($remaining));
+        $stats = ob_get_clean();
+
+        $empty = '';
+        if (empty($remaining)) {
+            ob_start();
+            $this->printEmptyState();
+            $empty = ob_get_clean();
+        }
+
+        wp_send_json_success(array(
+            'id'    => $id,
+            'stats' => $stats,
+            'empty' => $empty,
+        ));
+    }
+
     /**
      * Render one row. Single source of truth for the item markup: printMetaBox()
      * loops over it, and the attach AJAX handler buffers it for the response.
@@ -1121,15 +1085,15 @@ CSS;
         $attachment_id   = $attachment->ID;
         $attachment_url  = wp_get_attachment_url($attachment_id);
         $attachment_mime = sanitize_title($attachment->post_mime_type);
-        $attachment_path = get_attached_file($attachment_id);
-        $file_type       = $this->getFileType($attachment->post_mime_type);
+        $file_bytes      = wpatt_get_attachment_filesize($attachment_id);
+        $file_type       = wpatt_get_file_type($attachment->post_mime_type);
 
         $title = ('' !== trim((string) $attachment->post_title))
             ? $attachment->post_title
             : __('(no title)', 'wp-attachments');
 
-        $file_size = ($attachment_path && file_exists($attachment_path))
-            ? wpatt_format_bytes(filesize($attachment_path), 1)
+        $file_size = (false !== $file_bytes)
+            ? wpatt_format_bytes($file_bytes, 1)
             : __('Not found', 'wp-attachments');
 
         $formatted_date = $this->formatDate($attachment->post_date);
@@ -1242,14 +1206,20 @@ add_action('save_post', function($post_id) {
         // Don't update meta if our box wasn't submitted (e.g. auto-draft)
         return;
     }
-    if ( isset($_POST["wpa_off"]) ) {
-        delete_post_meta($post_id, "wpa_off");
-    } else {
-        update_post_meta($post_id, "wpa_off", isset($_POST["wpa_off"]) ? '' : '1');
+    if (wp_is_post_revision($post_id)) {
+        return;
     }
-});
+    // No toggle is printed while the frontend is off for this post type:
+    // keep the post's own choice instead of reading that as "hide".
+    if (!wpatt_is_frontend_enabled(get_post_type($post_id))) {
+        return;
+    }
 
-add_action('plugins_loaded', function() {
-    load_plugin_textdomain('wp-attachments', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+    // The checkbox is named after the old meta but means "show".
+    if (isset($_POST['wpa_off'])) {
+        delete_post_meta($post_id, 'wpa_off');
+    } else {
+        update_post_meta($post_id, 'wpa_off', '1');
+    }
 });
 ?>
