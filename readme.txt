@@ -2,7 +2,7 @@
 Contributors: Milmor
 Tags: attachments, media, file, list, classicpress
 Donate link: https://www.paypal.me/milesimarco
-Requires at least: 4.4
+Requires at least: 5.0
 Requires PHP: 7.4
 Tested up to: 7.2
 Version: 6.1

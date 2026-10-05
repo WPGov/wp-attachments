@@ -6,7 +6,7 @@ Description: Powerful solution to manage and show your WordPress media in posts 
 Author: Marco Milesi
 Author URI:   https://www.marcomilesi.com
 Version: 6.1
-Requires at least: 4.4
+Requires at least: 5.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
